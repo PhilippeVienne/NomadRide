@@ -1,7 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.tsx';
 import './index.css';
+
+// Initialize TanStack Query Client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Prevents aggressive automatic background updates during testing/riding
+      retry: 1, // Minimize retry attempts to preserve mobile battery
+    },
+  },
+});
 
 // Register PWA Service Worker
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
@@ -18,6 +29,8 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </React.StrictMode>
 );

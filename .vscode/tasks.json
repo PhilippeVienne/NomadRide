@@ -9,23 +9,28 @@
         "cwd": "${workspaceFolder}/backend"
       },
       "isBackground": true,
-      "problemMatcher": ["$tsc-watch"],
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
       "presentation": {
         "group": "nomadride",
         "label": "backend-dev"
       }
     },
     {
-      "label": "Start Mobile App",
+      "label": "Start Frontend",
       "type": "shell",
-      "command": "npx expo start",
+      "command": "npm run dev",
       "options": {
         "cwd": "${workspaceFolder}/app"
       },
       "presentation": {
         "group": "nomadride",
         "label": "app-dev"
-      }
+      },
+      "problemMatcher": [
+        "$eslint-stylish"
+      ]
     },
     {
       "label": "Terraform Init",

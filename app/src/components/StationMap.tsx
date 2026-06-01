@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { FuelStation, FuelType } from '../services/apiService';
-import { getStationBrand } from '../App';
+import { getStationBrand } from '../utils/stationUtils';
 
 interface StationMapProps {
   stations: FuelStation[];
