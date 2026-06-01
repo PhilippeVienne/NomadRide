@@ -1,13 +1,20 @@
 import { Hono } from 'hono';
-import { getCheapestSP98 } from '../services/fuelService';
+import { getCheapestFuel, FuelType } from '../services/fuelService';
 
 const fuel = new Hono();
 
-fuel.get('/sp98/cheapest', async (c) => {
+fuel.get('/cheapest', async (c) => {
+  const type = (c.req.query('type') || 'sp98') as FuelType;
   const limit = Number(c.req.query('limit')) || 10;
-  const stations = await getCheapestSP98(limit);
+
+  if (!['sp98', 'sp95', 'e10'].includes(type)) {
+    return c.json({ error: 'Invalid fuel type. Use sp98, sp95, or e10.' }, 400);
+  }
+
+  const stations = await getCheapestFuel(type, limit);
   
   return c.json({
+    fuelType: type,
     count: stations.length,
     stations,
   });

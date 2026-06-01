@@ -6,9 +6,15 @@ export interface FuelStation {
   adresse: string;
   ville: string;
   sp98_prix?: number;
+  sp95_prix?: number;
+  e10_prix?: number;
   sp98_maj?: string;
+  sp95_maj?: string;
+  e10_maj?: string;
   services_service?: string;
 }
+
+export type FuelType = 'sp98' | 'sp95' | 'e10';
 
 const API_URL = 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json?lang=fr&timezone=Europe%2FParis';
 
@@ -20,7 +26,6 @@ const CACHE_TTL = 3600 * 1000; // 1 hour
 export async function getFuelStations(): Promise<FuelStation[]> {
   const now = Date.now();
   if (cachedStations.length > 0 && now - lastFetch < CACHE_TTL) {
-    console.log('⚡ Using cached fuel data');
     return cachedStations;
   }
 
@@ -35,14 +40,16 @@ export async function getFuelStations(): Promise<FuelStation[]> {
     return cachedStations;
   } catch (error) {
     console.error('❌ Error fetching fuel data:', error);
-    return cachedStations; // Return old data if fetch fails
+    return cachedStations;
   }
 }
 
-export async function getCheapestSP98(limit: number = 10): Promise<FuelStation[]> {
+export async function getCheapestFuel(type: FuelType, limit: number = 10): Promise<FuelStation[]> {
   const stations = await getFuelStations();
+  const priceKey = `${type}_prix` as keyof FuelStation;
+
   return stations
-    .filter((s) => s.sp98_prix !== undefined && s.sp98_prix !== null)
-    .sort((a, b) => (a.sp98_prix || Infinity) - (b.sp98_prix || Infinity))
+    .filter((s) => s[priceKey] !== undefined && s[priceKey] !== null)
+    .sort((a, b) => ((a[priceKey] as number) || Infinity) - ((b[priceKey] as number) || Infinity))
     .slice(0, limit);
 }
