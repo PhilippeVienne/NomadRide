@@ -429,12 +429,6 @@ export default function App() {
     return (
       <aside className="sidebar">
         <div className="logo-container">
-          <svg className="logo-icon" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="256" cy="256" r="220" stroke="#ffc700" strokeWidth="20" strokeDasharray="10,15" />
-            <path d="M 120 400 C 120 280, 240 280, 240 200 C 240 140, 160 140, 160 100" stroke="#ff6b00" strokeWidth="28" strokeLinecap="round" />
-            <path d="M 392 400 C 392 280, 272 280, 272 200 C 272 140, 352 140, 352 100" stroke="#ffc700" strokeWidth="28" strokeLinecap="round" />
-            <circle cx="256" cy="256" r="24" fill="#121214" stroke="#ffc700" strokeWidth="6" />
-          </svg>
           <div className="logo-text">
             <h1>NomadRide</h1>
             <span>Rider Companion</span>

@@ -81,6 +81,8 @@ jobs:
           npm ci
 
       - name: Build frontend
+        env:
+          VITE_API_URL: https://api.ride.vienne.me
         run: |
           cd app
           npm run build
