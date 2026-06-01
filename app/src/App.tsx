@@ -347,7 +347,53 @@ export default function App() {
         </button>
 
         <div className="main-layout">
-          {/* Main Content Column (Left on Desktop, Full Width on Mobile) */}
+          {/* Controls Sidebar (Search & Filters & Settings trigger) */}
+          <aside className={`controls-sidebar collapsible-container ${mobileFiltersExpanded ? '' : 'collapsed'}`}>
+            {/* Settings trigger */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowSettingsModal(true);
+                if (window.innerWidth <= 1024) {
+                  setMobileFiltersExpanded(false);
+                }
+              }}
+              className="glove-target action-btn settings-trigger-btn"
+              style={{ width: '100%', minHeight: '56px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}
+            >
+              🏍️ Rider Settings
+            </button>
+
+            <SearchControls
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              suggestions={suggestions}
+              showSuggestions={showSuggestions}
+              setShowSuggestions={setShowSuggestions}
+              gpsActive={gpsActive}
+              loading={loading}
+              onTextSearch={handleTextSearch}
+              onSelectSuggestion={handleSelectSuggestion}
+              onGpsSearch={handleGpsSearch}
+              onClearGps={handleClearGps}
+              onManualRefresh={handleManualRefresh}
+            />
+
+            <FilterControls
+              filteredStationsCount={filteredStations.length}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              filterBrand={filterBrand}
+              setFilterBrand={setFilterBrand}
+              filterService={filterService}
+              setFilterService={setFilterService}
+              filterInStockOnly={filterInStockOnly}
+              setFilterInStockOnly={setFilterInStockOnly}
+              brandsList={brandsList}
+            />
+          </aside>
+
+          {/* Main Content Column */}
           <div className="main-content-column" style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
             {gpsError && (
               <div className="gps-error-message" role="alert">
@@ -418,52 +464,6 @@ export default function App() {
               </>
             )}
           </div>
-
-          {/* Right Sidebar Column (Search & Filters & Settings trigger) */}
-          <aside className={`controls-sidebar collapsible-container ${mobileFiltersExpanded ? '' : 'collapsed'}`}>
-            {/* Settings trigger */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowSettingsModal(true);
-                if (window.innerWidth <= 1024) {
-                  setMobileFiltersExpanded(false);
-                }
-              }}
-              className="glove-target action-btn settings-trigger-btn"
-              style={{ width: '100%', minHeight: '56px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}
-            >
-              🏍️ Rider Settings
-            </button>
-
-            <SearchControls
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              suggestions={suggestions}
-              showSuggestions={showSuggestions}
-              setShowSuggestions={setShowSuggestions}
-              gpsActive={gpsActive}
-              loading={loading}
-              onTextSearch={handleTextSearch}
-              onSelectSuggestion={handleSelectSuggestion}
-              onGpsSearch={handleGpsSearch}
-              onClearGps={handleClearGps}
-              onManualRefresh={handleManualRefresh}
-            />
-
-            <FilterControls
-              filteredStationsCount={filteredStations.length}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              filterBrand={filterBrand}
-              setFilterBrand={setFilterBrand}
-              filterService={filterService}
-              setFilterService={setFilterService}
-              filterInStockOnly={filterInStockOnly}
-              setFilterInStockOnly={setFilterInStockOnly}
-              brandsList={brandsList}
-            />
-          </aside>
         </div>
       </>
     );

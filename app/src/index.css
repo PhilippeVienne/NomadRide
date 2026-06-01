@@ -2044,35 +2044,34 @@ h1, h2, h3, h4, .font-display {
 
 /* --- Layout Restructuring & Collapsible Panels --- */
 .main-layout {
-  display: grid;
-  grid-template-columns: 1fr 340px;
+  display: flex;
+  flex-direction: column;
   gap: 32px;
+}
+
+.controls-sidebar {
+  display: grid;
+  grid-template-columns: 240px 1.1fr 0.9fr;
+  gap: 24px;
   align-items: start;
 }
 
 @media (max-width: 1024px) {
-  .main-layout {
+  .controls-sidebar {
+    display: flex;
+    flex-direction: column;
     grid-template-columns: 1fr;
     gap: 20px;
   }
 }
 
-.controls-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
 .collapsible-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
   transition: var(--transition-smooth);
 }
 
 @media (max-width: 1024px) {
   .collapsible-container.collapsed {
-    display: none;
+    display: none !important;
   }
 }
 
