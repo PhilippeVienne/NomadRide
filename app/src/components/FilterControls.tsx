@@ -51,46 +51,48 @@ export default function FilterControls({
         </div>
       </div>
       <div className="filter-controls" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div className="filter-control-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label htmlFor="filter-brand-select" className="filter-label">Brand</label>
-          <select
-            id="filter-brand-select"
-            value={filterBrand}
-            onChange={(e) => setFilterBrand(e.target.value)}
-            className="glove-target filter-select"
-            style={{ width: '100%' }}
-          >
-            <option value="all">All Brands</option>
-            {brandsList.map((b) => (
-              <option key={b.logoKey} value={b.logoKey || 'independent'}>{b.name}</option>
-            ))}
-            <option value="independent">Indépendant</option>
-          </select>
-        </div>
+        <div className="filter-controls-row">
+          <div className="filter-control-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label htmlFor="filter-brand-select" className="filter-label">Brand</label>
+            <select
+              id="filter-brand-select"
+              value={filterBrand}
+              onChange={(e) => setFilterBrand(e.target.value)}
+              className="glove-target filter-select"
+              style={{ width: '100%' }}
+            >
+              <option value="all">All Brands</option>
+              {brandsList.map((b) => (
+                <option key={b.logoKey} value={b.logoKey || 'independent'}>{b.name}</option>
+              ))}
+              <option value="independent">Indépendant</option>
+            </select>
+          </div>
 
-        <div className="filter-control-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label htmlFor="filter-service-select" className="filter-label">Service</label>
-          <select
-            id="filter-service-select"
-            value={filterService}
-            onChange={(e) => setFilterService(e.target.value)}
-            className="glove-target filter-select"
-            style={{ width: '100%' }}
-          >
-            <option value="all">All Services</option>
-            <option value="air">Air 🛞</option>
-            <option value="wash">Wash 🧼</option>
-            <option value="gas">Gas 💨</option>
-            <option value="shop">Shop 🏪</option>
-            <option value="food">Food 🍔</option>
-            <option value="parcel">Parcel 📦</option>
-            <option value="wifi">Wifi 🛜</option>
-            <option value="wc">WC 🚻</option>
-            <option value="shower">Shower 🚿</option>
-            <option value="repair">Repair 🛠️</option>
-            <option value="24/7 pay">24/7 Pay 💳</option>
-            <option value="rental">Rental 🚗</option>
-          </select>
+          <div className="filter-control-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label htmlFor="filter-service-select" className="filter-label">Service</label>
+            <select
+              id="filter-service-select"
+              value={filterService}
+              onChange={(e) => setFilterService(e.target.value)}
+              className="glove-target filter-select"
+              style={{ width: '100%' }}
+            >
+              <option value="all">All Services</option>
+              <option value="air">Air 🛞</option>
+              <option value="wash">Wash 🧼</option>
+              <option value="gas">Gas 💨</option>
+              <option value="shop">Shop 🏪</option>
+              <option value="food">Food 🍔</option>
+              <option value="parcel">Parcel 📦</option>
+              <option value="wifi">Wifi 🛜</option>
+              <option value="wc">WC 🚻</option>
+              <option value="shower">Shower 🚿</option>
+              <option value="repair">Repair 🛠️</option>
+              <option value="24/7 pay">24/7 Pay 💳</option>
+              <option value="rental">Rental 🚗</option>
+            </select>
+          </div>
         </div>
 
         <div className="filter-control-group toggle-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

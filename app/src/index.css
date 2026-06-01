@@ -578,9 +578,15 @@ h1, h2, h3, h4, .font-display {
 
 .search-form {
   display: flex;
-  flex-grow: 1;
+  flex-direction: row;
   gap: 12px;
-  min-width: 320px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .search-form {
+    flex-direction: column;
+  }
 }
 
 .search-input {
@@ -611,6 +617,16 @@ h1, h2, h3, h4, .font-display {
   letter-spacing: 0.05em;
   font-weight: 800;
   border-radius: 14px;
+  min-height: 56px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+@media (max-width: 600px) {
+  .search-submit-btn {
+    width: 100%;
+  }
 }
 
 .search-submit-btn:hover {
@@ -1309,6 +1325,23 @@ h1, h2, h3, h4, .font-display {
   gap: 20px;
   flex-wrap: wrap;
   align-items: flex-end;
+}
+
+.filter-controls-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+}
+
+.filter-controls-row .filter-control-group {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .filter-controls-row {
+    flex-direction: column;
+  }
 }
 
 .filter-control-group {

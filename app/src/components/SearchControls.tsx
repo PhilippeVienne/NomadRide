@@ -32,7 +32,7 @@ export default function SearchControls({
 }: SearchControlsProps) {
   return (
     <section className="search-controls-container" aria-label="Search Controls" style={{ width: '100%' }}>
-      <form onSubmit={onTextSearch} className="search-form" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <form onSubmit={onTextSearch} className="search-form">
         <div className="search-input-wrapper" style={{ position: 'relative', width: '100%' }}>
           <input
             type="text"
@@ -69,7 +69,6 @@ export default function SearchControls({
           type="submit" 
           className="glove-target search-submit-btn" 
           id="fuel-search-submit"
-          style={{ width: '100%' }}
         >
           🔍 Search
         </button>
