@@ -1,37 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, SafeAreaView, StatusBar, TouchableOpacity } from 'react-native';
-
-interface FuelStation {
-  id: number;
-  adresse: string;
-  ville: string;
-  sp98_prix?: number;
-  sp95_prix?: number;
-  e10_prix?: number;
-}
-
-type FuelType = 'sp98' | 'sp95' | 'e10';
+import { ApiService, FuelStation, FuelType } from './src/services/apiService';
 
 export default function App() {
   const [stations, setStations] = useState<FuelStation[]>([]);
   const [loading, setLoading] = useState(true);
   const [fuelType, setFuelType] = useState<FuelType>('sp98');
 
-  const fetchCheapestFuel = async (type: FuelType) => {
+  const loadFuelData = async (type: FuelType) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://10.0.2.2:8080/api/fuel/cheapest?type=${type}&limit=10`);
-      const data = await response.json();
-      setStations(data.stations);
+      const data = await ApiService.getCheapestFuel(type);
+      setStations(data);
     } catch (error) {
-      console.error('Error fetching fuel data:', error);
+      console.error('Failed to load fuel data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCheapestFuel(fuelType);
+    loadFuelData(fuelType);
   }, [fuelType]);
 
   const renderStation = ({ item }: { item: FuelStation }) => {
