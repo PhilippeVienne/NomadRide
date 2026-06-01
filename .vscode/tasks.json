@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Backend (Dev)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "presentation": {
+        "group": "nomadride",
+        "label": "backend-dev"
+      }
+    },
+    {
+      "label": "Start Mobile App",
+      "type": "shell",
+      "command": "npx expo start",
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "presentation": {
+        "group": "nomadride",
+        "label": "app-dev"
+      }
+    },
+    {
+      "label": "Terraform Init",
+      "type": "shell",
+      "command": "terraform init",
+      "options": {
+        "cwd": "${workspaceFolder}/infrastructure"
+      }
+    }
+  ]
+}
