@@ -314,131 +314,142 @@ export default function App() {
             <h2>⛽ Pit-Stop Locator</h2>
             <p>Locate the cheapest fuel stations in your route vicinity</p>
           </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div className="selector-group" role="group" aria-label="View Mode Selector" style={{ margin: 0 }}>
-              <button
-                type="button"
-                className={`glove-target selector-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-                id="view-list-toggle-btn"
-              >
-                List
-              </button>
-              <button
-                type="button"
-                className={`glove-target selector-btn ${viewMode === 'map' ? 'active' : ''}`}
-                onClick={() => setViewMode('map')}
-                id="view-map-toggle-btn"
-              >
-                Map
-              </button>
-            </div>
 
-            <div className="selector-group" role="group" aria-label="Fuel Type Selector">
-              {(['sp98', 'sp95', 'e10'] as FuelType[]).map((type) => (
+          {/* Controls: two rows — selectors on top, action buttons below */}
+          <div className="header-controls">
+            {/* Row 1: List/Map + Fuel Type selectors */}
+            <div className="header-controls-row">
+              <div className="selector-group" role="group" aria-label="View Mode Selector">
                 <button
-                  id={`fuel-select-${type}`}
-                  key={type}
-                  onClick={() => setFuelType(type)}
-                  className={`glove-target selector-btn ${fuelType === type ? 'active' : ''}`}
+                  type="button"
+                  className={`glove-target selector-btn ${viewMode === 'list' ? 'active' : ''}`}
+                  onClick={() => setViewMode('list')}
+                  id="view-list-toggle-btn"
                 >
-                  {type.toUpperCase()}
+                  List
                 </button>
-              ))}
+                <button
+                  type="button"
+                  className={`glove-target selector-btn ${viewMode === 'map' ? 'active' : ''}`}
+                  onClick={() => setViewMode('map')}
+                  id="view-map-toggle-btn"
+                >
+                  Map
+                </button>
+              </div>
+
+              <div className="selector-group" role="group" aria-label="Fuel Type Selector">
+                {(['sp98', 'sp95', 'e10'] as FuelType[]).map((type) => (
+                  <button
+                    id={`fuel-select-${type}`}
+                    key={type}
+                    onClick={() => setFuelType(type)}
+                    className={`glove-target selector-btn ${fuelType === type ? 'active' : ''}`}
+                  >
+                    {type.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
 
-             <div style={{ position: 'relative' }}>
+            {/* Row 2: Trip Settings dropdown + Filter toggle (mobile) */}
+            <div className="header-controls-row">
+              <div style={{ position: 'relative', flexGrow: 1 }}>
+                <button
+                  type="button"
+                  onClick={() => setTripDropdownOpen(!tripDropdownOpen)}
+                  className="glove-target action-btn"
+                  style={{
+                    width: '100%',
+                    padding: '0 20px',
+                    borderRadius: '14px',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    borderColor: 'var(--neon-orange)',
+                    color: 'var(--neon-orange)',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  🏍️ Trip Settings ▾
+                </button>
+
+                {tripDropdownOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    left: 0,
+                    width: 'max(100%, 240px)',
+                    maxWidth: 'calc(100vw - 32px)',
+                    background: 'rgba(19, 19, 26, 0.98)',
+                    backdropFilter: 'blur(16px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '16px',
+                    padding: '16px',
+                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>👤 Profile:</span>
+                      <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>Rider</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Consumption:</span>
+                      <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{consumption} L/100km</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Tank Capacity:</span>
+                      <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{fillSize} L</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>🧭 Search Radius:</span>
+                      <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{searchRadius} km</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowSettingsModal(true);
+                        setTripDropdownOpen(false);
+                      }}
+                      className="glove-target action-btn"
+                      style={{
+                        width: '100%',
+                        minHeight: '44px',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        borderRadius: '10px',
+                        marginTop: '4px',
+                      }}
+                    >
+                      ⚙️ Edit Config
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Filter toggle — visible only on mobile, same row as Trip Settings */}
               <button
                 type="button"
-                onClick={() => setTripDropdownOpen(!tripDropdownOpen)}
-                className="glove-target action-btn"
-                style={{
-                  minHeight: '70px',
-                  padding: '12px 24px',
-                  borderRadius: '16px',
-                  fontSize: '1.05rem',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  borderColor: 'var(--neon-orange)',
-                  color: 'var(--neon-orange)',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  boxSizing: 'border-box',
-                }}
+                className="glove-target mobile-toggle-btn"
+                onClick={() => setMobileFiltersExpanded(!mobileFiltersExpanded)}
+                aria-expanded={mobileFiltersExpanded}
+                style={{ flexShrink: 0 }}
               >
-                🏍️ Trip Settings ▾
+                {mobileFiltersExpanded ? '✕' : '⚙ Filters'}
               </button>
-
-              {tripDropdownOpen && (
-                <div style={{
-                  position: 'absolute',
-                  top: '76px',
-                  right: 0,
-                  width: '260px',
-                  background: 'rgba(19, 19, 26, 0.95)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '16px',
-                  padding: '16px',
-                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)',
-                  zIndex: 1000,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>👤 Profile:</span>
-                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>Rider</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Consumption:</span>
-                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{consumption} L/100km</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Tank Capacity:</span>
-                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{fillSize} L</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>🧭 Search Radius:</span>
-                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{searchRadius} km</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSettingsModal(true);
-                      setTripDropdownOpen(false);
-                    }}
-                    className="glove-target action-btn"
-                    style={{
-                      width: '100%',
-                      minHeight: '44px',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      borderRadius: '10px',
-                      marginTop: '8px',
-                    }}
-                  >
-                    ⚙️ Edit Config
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </header>
-
-        {/* Mobile Filter Toggle */}
-        <button
-          type="button"
-          className="glove-target mobile-toggle-btn"
-          onClick={() => setMobileFiltersExpanded(!mobileFiltersExpanded)}
-          aria-expanded={mobileFiltersExpanded}
-        >
-          {mobileFiltersExpanded ? '❌ Close Filters' : '🔍 Filters & Search'}
-        </button>
 
         <div className="main-layout">
           {/* Controls Sidebar (Search & Filters) */}

@@ -265,12 +265,16 @@ h1, h2, h3, h4, .font-display {
   align-items: center;
   margin-bottom: 32px;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 600px) {
   .module-header {
     flex-direction: column;
     align-items: flex-start;
+    margin-bottom: 20px;
+    overflow: hidden;
+    max-width: 100%;
   }
 }
 
@@ -299,17 +303,17 @@ h1, h2, h3, h4, .font-display {
   width: fit-content;
 }
 
-@media (max-width: 600px) {
-  .selector-group {
-    width: 100%;
-  }
-}
-
 .selector-btn {
   background: transparent;
   border: none;
   color: var(--text-secondary);
   flex-grow: 1;
+  min-height: 56px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .selector-btn.active {
@@ -551,6 +555,12 @@ h1, h2, h3, h4, .font-display {
   background-color: transparent;
   border: 1px solid var(--neon-blue);
   color: var(--neon-blue);
+  min-height: 56px;
+  padding: 0 16px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .action-btn:hover {
@@ -2065,6 +2075,46 @@ h1, h2, h3, h4, .font-display {
   font-size: 1.1rem;
 }
 
+/* ── Header two-row control layout ── */
+.header-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  min-width: 0;
+}
+
+.header-controls-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Selector groups can shrink on very narrow screens */
+.header-controls-row .selector-group {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.header-controls-row .selector-group .selector-btn {
+  min-width: 0;
+  flex-shrink: 1;
+  padding-inline: 12px;
+}
+
+@media (max-width: 600px) {
+  .header-controls {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .header-controls-row {
+    width: 100%;
+  }
+}
+
 /* --- Layout Restructuring & Collapsible Panels --- */
 .main-layout {
   display: flex;
@@ -2099,7 +2149,8 @@ h1, h2, h3, h4, .font-display {
 
 .mobile-toggle-btn {
   display: none;
-  width: 100%;
+  min-height: 56px;
+  padding: 0 16px;
   background: rgba(19, 19, 26, 0.65);
   border: 1px solid var(--border-color);
   color: #fff;
@@ -2108,10 +2159,10 @@ h1, h2, h3, h4, .font-display {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-radius: 14px;
-  margin-bottom: 16px;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  white-space: nowrap;
 }
 
 @media (max-width: 1024px) {
