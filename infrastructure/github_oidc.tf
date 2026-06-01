@@ -46,7 +46,8 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
       {
         Effect = "Allow"
         Action = [
-          "ecr:GetAuthorizationToken"
+          "ecr:GetAuthorizationToken",
+          "cloudfront:ListDistributions"
         ]
         Resource = "*"
       },
@@ -86,9 +87,17 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
       {
         Effect = "Allow"
         Action = [
-          "ssm:PutParameter"
+          "ssm:PutParameter",
+          "ssm:GetParameter"
         ]
         Resource = "arn:aws:ssm:eu-west-3:354602314627:parameter/nomadride/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:UpdateFunctionCode"
+        ]
+        Resource = aws_lambda_function.backend.arn
       }
     ]
   })
