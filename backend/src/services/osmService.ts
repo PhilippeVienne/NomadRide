@@ -8,7 +8,12 @@
  * metadata including the `brand` tag for fuel stations.
  */
 
-const OVERPASS_API = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_APIS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
+  'https://z.overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
 const NOMINATIM_API = 'https://nominatim.openstreetmap.org/search';
 
 // Geocoding cache
@@ -120,48 +125,65 @@ async function fetchOsmFuelStations(
   const radiusMeters = Math.ceil(radiusKm * 1000);
 
   // Overpass QL query: fetch fuel nodes + ways within radius, output as JSON with center coords
-  const query = `[out:json][timeout:15];(node["amenity"="fuel"](around:${radiusMeters},${lat},${lon});way["amenity"="fuel"](around:${radiusMeters},${lat},${lon}););out center tags;`;
+  // Set short internal timeout in Overpass QL
+  const query = `[out:json][timeout:5];(node["amenity"="fuel"](around:${radiusMeters},${lat},${lon});way["amenity"="fuel"](around:${radiusMeters},${lat},${lon}););out center tags;`;
 
-  try {
-    console.log(`🗺️ Fetching OSM fuel station brands (radius: ${radiusKm}km)...`);
-    const response = await fetch(OVERPASS_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-        'User-Agent': 'NomadRide/1.0',
-      },
-      body: `data=${encodeURIComponent(query)}`,
-    });
+  for (const apiEndpoint of OVERPASS_APIS) {
+    try {
+      console.log(`🗺️ Fetching OSM fuel station brands from ${apiEndpoint} (radius: ${radiusKm}km)...`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
 
-    if (!response.ok) {
-      console.warn(`⚠️ Overpass API returned status ${response.status}`);
-      return cached?.stations ?? [];
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
+          'User-Agent': 'NomadRide/1.0',
+        },
+        body: `data=${encodeURIComponent(query)}`,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.warn(`⚠️ Overpass API (${apiEndpoint}) returned status ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const elements: OsmFuelStation[] = (data.elements || []).map((el: any) => {
+        // For ways/relations, Overpass returns center coords when using "out center"
+        const elLat = el.lat ?? el.center?.lat;
+        const elLon = el.lon ?? el.center?.lon;
+        return {
+          lat: elLat,
+          lon: elLon,
+          brand: el.tags?.brand || el.tags?.['brand:en'] || undefined,
+          operator: el.tags?.operator || undefined,
+          name: el.tags?.name || undefined,
+          ref: el.tags?.['ref:FR:prix-carburants'] || undefined,
+        };
+      }).filter((s: OsmFuelStation) => s.lat !== undefined && s.lon !== undefined);
+
+      console.log(`✅ OSM returned ${elements.length} fuel stations with brand data from ${apiEndpoint}`);
+
+      osmCache.set(cacheKey, { stations: elements, fetchedAt: Date.now() });
+      return elements;
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.warn(`⏳ Overpass API (${apiEndpoint}) timed out after 6 seconds.`);
+      } else {
+        console.error(`❌ Overpass API error from ${apiEndpoint}:`, error);
+      }
+      // Continue loop to try next mirror
     }
-
-    const data = await response.json();
-    const elements: OsmFuelStation[] = (data.elements || []).map((el: any) => {
-      // For ways/relations, Overpass returns center coords when using "out center"
-      const elLat = el.lat ?? el.center?.lat;
-      const elLon = el.lon ?? el.center?.lon;
-      return {
-        lat: elLat,
-        lon: elLon,
-        brand: el.tags?.brand || el.tags?.['brand:en'] || undefined,
-        operator: el.tags?.operator || undefined,
-        name: el.tags?.name || undefined,
-        ref: el.tags?.['ref:FR:prix-carburants'] || undefined,
-      };
-    }).filter((s: OsmFuelStation) => s.lat !== undefined && s.lon !== undefined);
-
-    console.log(`✅ OSM returned ${elements.length} fuel stations with brand data`);
-
-    osmCache.set(cacheKey, { stations: elements, fetchedAt: Date.now() });
-    return elements;
-  } catch (error) {
-    console.error('❌ Overpass API error:', error);
-    return cached?.stations ?? [];
   }
+
+  console.warn('⚠️ All Overpass API mirrors failed to return brand data.');
+  return cached?.stations ?? [];
 }
 
 /**
