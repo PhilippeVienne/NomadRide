@@ -72,6 +72,8 @@ export default function App() {
   const [filterBrand, setFilterBrand] = useState<string>('all');
   const [filterService, setFilterService] = useState<string>('all');
   const [filterInStockOnly, setFilterInStockOnly] = useState<boolean>(false);
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -296,14 +298,25 @@ export default function App() {
         }
       }
 
+      // 4. Price range filter
+      const price = station[`${fuelType}_prix` as keyof FuelStation] as number | undefined;
+      if (price !== undefined) {
+        if (minPrice !== '' && price < parseFloat(minPrice)) {
+          return false;
+        }
+        if (maxPrice !== '' && price > parseFloat(maxPrice)) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [stations, fuelType, filterBrand, filterService, filterInStockOnly]);
+  }, [stations, fuelType, filterBrand, filterService, filterInStockOnly, minPrice, maxPrice]);
 
   // Reset page when filters, search, or stations change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterBrand, filterService, filterInStockOnly, fuelType, gpsActive, gpsCoords, suggestionCoords, submittedSearchQuery]);
+  }, [filterBrand, filterService, filterInStockOnly, fuelType, gpsActive, gpsCoords, suggestionCoords, submittedSearchQuery, minPrice, maxPrice]);
 
   // Compute paginated slice
   const totalPages = Math.max(1, Math.ceil(filteredStations.length / pageSize));
@@ -352,19 +365,23 @@ export default function App() {
             {/* Settings trigger card */}
             <section className="rider-settings-container">
               <div className="filter-header" style={{ marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏍️ Rider Config</h3>
+                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏍️ Trip Settings</h3>
               </div>
               <div className="rider-settings-details" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flexGrow: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Tank Capacity:</span>
-                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{fillSize} L</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>👤 Profile:</span>
+                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>Rider</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Consumption:</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>⛽ Avg. Consumption:</span>
                   <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{consumption} L/100km</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Search Radius:</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>⛽ Tank Capacity:</span>
+                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{fillSize} L</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>🧭 Search Radius:</span>
                   <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{searchRadius} km</span>
                 </div>
               </div>
@@ -408,6 +425,10 @@ export default function App() {
               setFilterService={setFilterService}
               filterInStockOnly={filterInStockOnly}
               setFilterInStockOnly={setFilterInStockOnly}
+              minPrice={minPrice}
+              setMinPrice={setMinPrice}
+              maxPrice={maxPrice}
+              setMaxPrice={setMaxPrice}
               brandsList={brandsList}
             />
           </aside>
