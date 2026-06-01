@@ -28,12 +28,25 @@ resource "aws_cloudwatch_log_group" "lambda" {
   retention_in_days = 7 # Keep logs for 7 days (cost optimization)
 }
 
+# SSM Parameter to track the latest deployed Docker image URI
+resource "aws_ssm_parameter" "backend_image" {
+  name        = "/nomadride/${var.environment}/backend/image_uri"
+  type        = "String"
+  value       = "${aws_ecr_repository.backend.repository_url}:latest"
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+}
+
 # AWS Lambda Function defined as a Docker container image
 resource "aws_lambda_function" "backend" {
   function_name = "${var.app_name}-${var.environment}-backend"
   role          = aws_iam_role.lambda_exec.arn
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.backend.repository_url}:latest"
+  image_uri     = aws_ssm_parameter.backend_image.value
 
   timeout     = 15 # 15 seconds max timeout
   memory_size = 512 # 512MB RAM for Hono JS app (well-balanced for cold starts and cost)

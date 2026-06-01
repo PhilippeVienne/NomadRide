@@ -1,4 +1,4 @@
-name: Deploy Frontend and Backend to AWS
+name: Deploy NomadRide Application
 
 on:
   push:
@@ -7,30 +7,33 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write # Required for requesting the JWT to assume IAM role
+  id-token: write # Required for assuming AWS IAM role via OIDC
   contents: read  # Required for checkout
 
 jobs:
-  deploy:
-    name: Build and Deploy
+  # ==========================================
+  # BUILD PHASE
+  # ==========================================
+  build-backend:
+    name: Build & Push Backend
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- Backend Build & Push ---
-      - name: Set up Node.js (Backend)
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Install Backend Dependencies
+      - name: Install dependencies
         run: |
           cd backend
           npm ci
 
-      - name: Build Backend
+      - name: Build backend
         run: |
           cd backend
           npm run build
@@ -45,7 +48,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push Backend Docker image to Amazon ECR
+      - name: Build, tag, and push Docker image to Amazon ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: nomadride-backend
@@ -58,21 +61,97 @@ jobs:
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:latest
 
-      # --- Frontend Build & Deploy ---
-      - name: Set up Node.js (Frontend)
+  build-frontend:
+    name: Build & Package Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
 
-      - name: Install Frontend Dependencies
+      - name: Install dependencies
         run: |
           cd app
           npm ci
 
-      - name: Build Frontend
+      - name: Build frontend
         run: |
           cd app
           npm run build
+
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: app/dist/
+          retention-days: 1
+
+  # ==========================================
+  # DEPLOY PHASE
+  # ==========================================
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    needs: build-backend
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Configure AWS credentials (via OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::354602314627:role/nomadride-github-actions-ecr
+          aws-region: eu-west-3
+
+      - name: Update Lambda Function Code and SSM Parameter
+        run: |
+          IMAGE_URI="354602314627.dkr.ecr.eu-west-3.amazonaws.com/nomadride-backend:${{ github.sha }}"
+          
+          # Check if the SSM Parameter exists in AWS (indicates that Terraform has run at least once)
+          if aws ssm get-parameter --name "/nomadride/production/backend/image_uri" >/dev/null 2>&1; then
+            echo "SSM Parameter exists. Proceeding with deployment update."
+            
+            echo "Updating SSM parameter /nomadride/production/backend/image_uri to $IMAGE_URI..."
+            aws ssm put-parameter \
+              --name "/nomadride/production/backend/image_uri" \
+              --value "$IMAGE_URI" \
+              --type "String" \
+              --overwrite
+
+            echo "Deploying image $IMAGE_URI to Lambda function..."
+            aws lambda update-function-code \
+              --function-name nomadride-production-backend \
+              --image-uri $IMAGE_URI
+          else
+            echo "SSM Parameter '/nomadride/production/backend/image_uri' does not exist yet."
+            echo "This indicates we are in the bootstrap phase (Terraform has not created the resources yet)."
+            echo "Skipping Lambda function update since the Lambda does not exist yet."
+          fi
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: app/dist/
+
+      - name: Configure AWS credentials (via OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::354602314627:role/nomadride-github-actions-ecr
+          aws-region: eu-west-3
 
       - name: Deploy Frontend to S3
         run: |

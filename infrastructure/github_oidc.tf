@@ -82,6 +82,13 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
           "cloudfront:CreateInvalidation"
         ]
         Resource = aws_cloudfront_distribution.cdn.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:PutParameter"
+        ]
+        Resource = "arn:aws:ssm:eu-west-3:354602314627:parameter/nomadride/*"
       }
     ]
   })
