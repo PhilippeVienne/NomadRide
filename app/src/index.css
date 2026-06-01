@@ -559,18 +559,21 @@ h1, h2, h3, h4, .font-display {
 }
 
 /* Search Bar & GPS Controls */
-.search-controls-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 28px;
-  background: rgba(19, 19, 26, 0.6);
+.rider-settings-container,
+.search-controls-container,
+.filter-controls-container {
+  background: rgba(19, 19, 26, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 20px;
+  padding: 24px;
   border-radius: 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  height: 100%;
 }
 
 .search-form {
@@ -1286,19 +1289,6 @@ h1, h2, h3, h4, .font-display {
 }
 
 /* Filter Controls Panel */
-.filter-controls-container {
-  background: rgba(19, 19, 26, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 20px;
-  border-radius: 24px;
-  margin-bottom: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
 
 .filter-header {
   display: flex;
@@ -2053,7 +2043,7 @@ h1, h2, h3, h4, .font-display {
   display: grid;
   grid-template-columns: 240px 1.1fr 0.9fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 1024px) {

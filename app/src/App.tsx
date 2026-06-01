@@ -349,20 +349,39 @@ export default function App() {
         <div className="main-layout">
           {/* Controls Sidebar (Search & Filters & Settings trigger) */}
           <aside className={`controls-sidebar collapsible-container ${mobileFiltersExpanded ? '' : 'collapsed'}`}>
-            {/* Settings trigger */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowSettingsModal(true);
-                if (window.innerWidth <= 1024) {
-                  setMobileFiltersExpanded(false);
-                }
-              }}
-              className="glove-target action-btn settings-trigger-btn"
-              style={{ width: '100%', minHeight: '56px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}
-            >
-              🏍️ Rider Settings
-            </button>
+            {/* Settings trigger card */}
+            <section className="rider-settings-container">
+              <div className="filter-header" style={{ marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏍️ Rider Config</h3>
+              </div>
+              <div className="rider-settings-details" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flexGrow: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Tank Capacity:</span>
+                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{fillSize} L</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Consumption:</span>
+                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{consumption} L/100km</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Search Radius:</span>
+                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{searchRadius} km</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSettingsModal(true);
+                  if (window.innerWidth <= 1024) {
+                    setMobileFiltersExpanded(false);
+                  }
+                }}
+                className="glove-target action-btn settings-trigger-btn"
+                style={{ width: '100%', minHeight: '56px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, marginTop: '16px' }}
+              >
+                ⚙️ Edit Config
+              </button>
+            </section>
 
             <SearchControls
               searchQuery={searchQuery}
