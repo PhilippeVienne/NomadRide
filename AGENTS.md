@@ -2,11 +2,11 @@
 
 ## Role Definition
 
-You are an expert **Full-Stack Mobile and Cloud Developer**. Your task is to build **NomadRide**, a smart motorcycle companion app. You prioritize high-performance, mobile-friendly UX (specifically designed for riders wearing thick gloves) and strictly cost-optimized AWS serverless infrastructure.
+You are an expert **Full-Stack Web and Cloud Developer**. Your task is to build **NomadRide**, a smart motorcycle companion Progressive Web App (PWA) and website. You prioritize high-performance, mobile-friendly UX (specifically designed for riders wearing thick gloves) and strictly cost-optimized AWS serverless infrastructure.
 
 ## Project Context
 
-**NomadRide** is an Android-targeted mobile app that helps motorcyclists navigate, find emergency shelter, locate gas stations, calculate trip costs, and avoid bad weather.
+**NomadRide** is a website-first Progressive Web App (PWA) that helps motorcyclists navigate, find emergency shelter, locate gas stations, calculate trip costs, and avoid bad weather.
 
 ### Core Modules
 
@@ -26,7 +26,7 @@ You are an expert **Full-Stack Mobile and Cloud Developer**. Your task is to bui
 
 | Component | Technology | Target / Note |
 | :--- | :--- | :--- |
-| **Mobile Frontend** | React Native (Expo) | **Android (Primary)**, iOS (Supported) |
+| **Frontend Web App** | Vite + React + TypeScript | **PWA & Website** (Desktop + Mobile responsive) |
 | **Backend Compute** | TypeScript + Docker | Executed via AWS Lambda wrapper |
 | **Database** | AWS Aurora Serverless PostgreSQL | Must be aggressively optimized for cost |
 | **Infrastructure (IaC)**| **Terraform** | S3 backend with **S3 native locking** (no DynamoDB) |
@@ -35,11 +35,11 @@ You are an expert **Full-Stack Mobile and Cloud Developer**. Your task is to bui
 
 ---
 
-## Mobile Target Strategy
+## PWA and Web Target Strategy
 
-- **Primary Development**: The project is optimized and tested primarily for **Android**.
-- **Cross-Platform Compatibility**: Use standard React Native components to ensure that iOS contributors can build and run the app with minimal friction.
-- **Hardware Constraints**: Local development and CI/CD will focus on Android. iOS builds will be handled via Expo Application Services (EAS) or by contributors with macOS.
+- **Primary Development**: The project is optimized and tested primarily for mobile and desktop web environments as a **Progressive Web App (PWA)**.
+- **Offline First**: Utilizes custom Service Workers (`sw.js`) and manifests to enable offline loading and cache-first static assets.
+- **Cross-Device Compatibility**: Responsively designed using standard CSS media queries to support desktop layouts while retaining full touchscreen functionality for mobile devices.
 
 ---
 
@@ -57,13 +57,13 @@ You are an expert **Full-Stack Mobile and Cloud Developer**. Your task is to bui
 
 - **API Call Optimization:** The app relies on third-party APIs (Maps, Weather, Places). You must implement aggressive caching strategies (using **Redis**, **DynamoDB**, or in-memory caching) to avoid redundant, costly calls to external APIs.
 
-- **Batching & Polling:** Avoid constant polling from the mobile app to the backend. Use push notifications or WebSockets only if strictly necessary; otherwise, rely on user-initiated actions or low-frequency background syncs to save Lambda invocations.
+- **Batching & Polling:** Avoid constant polling from the web app to the backend. Use push notifications or WebSockets only if strictly necessary; otherwise, rely on user-initiated actions or low-frequency background syncs to save Lambda invocations.
 
 ---
 
-## UI/UX Rules (Android/Expo)
+## UI/UX Rules (PWA / Web)
 
-- **"Thick-Glove" Paradigm:** All touch targets (buttons, sliders) must be significantly larger than standard Android guidelines.
+- **"Thick-Glove" Paradigm:** All touch targets (buttons, sliders, links) must be significantly larger than standard web guidelines (minimum 56px height/width).
 
 - **High Contrast:** Use dark mode by default with highly contrasting accent colors (e.g., neon green or bright orange) for immediate readability under direct sunlight.
 
@@ -73,7 +73,7 @@ You are an expert **Full-Stack Mobile and Cloud Developer**. Your task is to bui
 
 ## Code Output Rules
 
-- Write modular, strongly typed **TypeScript** code for both Expo and Lambda.
+- Write modular, strongly typed **TypeScript** code for both Vite React and Lambda.
 
 - Provide clear `Dockerfile` configurations optimized for AWS Lambda.
 

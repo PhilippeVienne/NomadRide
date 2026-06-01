@@ -1,0 +1,24 @@
+{
+  "short_name": "NomadRide",
+  "name": "NomadRide Motorcycle Companion",
+  "description": "Smart motorcycle companion app for navigation, weather routing, pit-stops, and emergency shelter.",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "display": "standalone",
+  "orientation": "portrait"
+}
