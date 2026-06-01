@@ -22,3 +22,9 @@ output "api_gateway_endpoint" {
   value       = aws_apigatewayv2_api.api.api_endpoint
   description = "The direct endpoint URL of the API Gateway"
 }
+
+output "github_actions_role_arn" {
+  value       = aws_iam_role.github_actions.arn
+  description = "The ARN of the IAM Role for GitHub Actions to assume"
+}
+

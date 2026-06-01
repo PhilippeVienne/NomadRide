@@ -1,11 +1,11 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.10.0"
 
   backend "s3" {
     bucket         = "nomadride-terraform-state"
     key            = "state/terraform.tfstate"
     region         = "eu-west-3"
-    # use_lockfile   = true # Use S3 native locking (available in Terraform 1.10+)
+    use_lockfile   = true # Use S3 native locking (available in Terraform 1.10+)
   }
 
   required_providers {
@@ -18,4 +18,9 @@ terraform {
 
 provider "aws" {
   region = "eu-west-3"
+}
+
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }

@@ -1,0 +1,94 @@
+name: Deploy Frontend and Backend to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write # Required for requesting the JWT to assume IAM role
+  contents: read  # Required for checkout
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --- Backend Build & Push ---
+      - name: Set up Node.js (Backend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Build Backend
+        run: |
+          cd backend
+          npm run build
+
+      - name: Configure AWS credentials (via OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::354602314627:role/nomadride-github-actions-ecr
+          aws-region: eu-west-3
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Backend Docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: nomadride-backend
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build the Docker image from backend directory
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest ./backend
+          
+          # Push both the commit-sha tag and latest tag
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:latest
+
+      # --- Frontend Build & Deploy ---
+      - name: Set up Node.js (Frontend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd app
+          npm ci
+
+      - name: Build Frontend
+        run: |
+          cd app
+          npm run build
+
+      - name: Deploy Frontend to S3
+        run: |
+          aws s3 sync app/dist/ s3://nomadride-production-frontend --delete
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          # Dynamically look up the CloudFront Distribution ID by the alias ride.vienne.me
+          DISTRIBUTION_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Aliases.Items[?@=='ride.vienne.me']].Id" --output text)
+          if [ "$DISTRIBUTION_ID" != "None" ] && [ -n "$DISTRIBUTION_ID" ]; then
+            echo "Invalidating CloudFront Distribution: $DISTRIBUTION_ID"
+            aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
+          else
+            echo "CloudFront distribution with alias ride.vienne.me not found"
+          fi
