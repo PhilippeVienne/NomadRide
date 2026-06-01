@@ -2073,15 +2073,9 @@ h1, h2, h3, h4, .font-display {
 }
 
 .controls-sidebar {
-  display: grid;
-  grid-template-columns: 280px 1.1fr 0.9fr;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  align-items: stretch;
-}
-
-.search-controls-row {
-  align-self: start;
-  margin-top: 44px;
 }
 
 @media (max-width: 1024px) {
@@ -2090,10 +2084,6 @@ h1, h2, h3, h4, .font-display {
     flex-direction: column;
     grid-template-columns: 1fr;
     gap: 20px;
-  }
-
-  .search-controls-row {
-    margin-top: 0;
   }
 }
 

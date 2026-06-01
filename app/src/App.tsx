@@ -9,11 +9,11 @@ import ExploreModule from './components/ExploreModule';
 import ShelterModule from './components/ShelterModule';
 import WalletModule from './components/WalletModule';
 import RadarModule from './components/RadarModule';
-import SearchControls from './components/SearchControls';
 import FilterControls from './components/FilterControls';
 import StationCard from './components/StationCard';
 import Pagination from './components/Pagination';
-import { brandsList, getStationBrand, parseServiceTag } from './utils/stationUtils';
+import ServicesModal from './components/ServicesModal';
+import { parseServiceTag } from './utils/stationUtils';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<ActiveModule>('pitstop');
@@ -69,11 +69,10 @@ export default function App() {
   };
 
   // UI Filters
-  const [filterBrand, setFilterBrand] = useState<string>('all');
   const [filterService, setFilterService] = useState<string>('all');
   const [filterInStockOnly, setFilterInStockOnly] = useState<boolean>(false);
-  const [minPrice, setMinPrice] = useState<string>('');
-  const [maxPrice, setMaxPrice] = useState<string>('');
+  const [servicesModalOpen, setServicesModalOpen] = useState<boolean>(false);
+  const [tripDropdownOpen, setTripDropdownOpen] = useState<boolean>(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -275,16 +274,7 @@ export default function App() {
         return false;
       }
 
-      // 2. Brand filter
-      if (filterBrand !== 'all') {
-        const brand = getStationBrand(station.id, station.adresse, station.ville);
-        const brandKey = brand.logoKey || 'independent';
-        if (brandKey !== filterBrand) {
-          return false;
-        }
-      }
-
-      // 3. Service filter
+      // 2. Service filter
       if (filterService !== 'all') {
         if (!station.services_service) {
           return false;
@@ -298,25 +288,14 @@ export default function App() {
         }
       }
 
-      // 4. Price range filter
-      const price = station[`${fuelType}_prix` as keyof FuelStation] as number | undefined;
-      if (price !== undefined) {
-        if (minPrice !== '' && price < parseFloat(minPrice)) {
-          return false;
-        }
-        if (maxPrice !== '' && price > parseFloat(maxPrice)) {
-          return false;
-        }
-      }
-
       return true;
     });
-  }, [stations, fuelType, filterBrand, filterService, filterInStockOnly, minPrice, maxPrice]);
+  }, [stations, fuelType, filterService, filterInStockOnly]);
 
   // Reset page when filters, search, or stations change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterBrand, filterService, filterInStockOnly, fuelType, gpsActive, gpsCoords, suggestionCoords, submittedSearchQuery, minPrice, maxPrice]);
+  }, [filterService, filterInStockOnly, fuelType, gpsActive, gpsCoords, suggestionCoords, submittedSearchQuery]);
 
   // Compute paginated slice
   const totalPages = Math.max(1, Math.ceil(filteredStations.length / pageSize));
@@ -335,17 +314,119 @@ export default function App() {
             <h2>⛽ Pit-Stop Locator</h2>
             <p>Locate the cheapest fuel stations in your route vicinity</p>
           </div>
-          <div className="selector-group" role="group" aria-label="Fuel Type Selector">
-            {(['sp98', 'sp95', 'e10'] as FuelType[]).map((type) => (
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="selector-group" role="group" aria-label="View Mode Selector" style={{ margin: 0 }}>
               <button
-                id={`fuel-select-${type}`}
-                key={type}
-                onClick={() => setFuelType(type)}
-                className={`glove-target selector-btn ${fuelType === type ? 'active' : ''}`}
+                type="button"
+                className={`glove-target selector-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+                id="view-list-toggle-btn"
               >
-                {type.toUpperCase()}
+                List
               </button>
-            ))}
+              <button
+                type="button"
+                className={`glove-target selector-btn ${viewMode === 'map' ? 'active' : ''}`}
+                onClick={() => setViewMode('map')}
+                id="view-map-toggle-btn"
+              >
+                Map
+              </button>
+            </div>
+
+            <div className="selector-group" role="group" aria-label="Fuel Type Selector">
+              {(['sp98', 'sp95', 'e10'] as FuelType[]).map((type) => (
+                <button
+                  id={`fuel-select-${type}`}
+                  key={type}
+                  onClick={() => setFuelType(type)}
+                  className={`glove-target selector-btn ${fuelType === type ? 'active' : ''}`}
+                >
+                  {type.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+             <div style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setTripDropdownOpen(!tripDropdownOpen)}
+                className="glove-target action-btn"
+                style={{
+                  minHeight: '70px',
+                  padding: '12px 24px',
+                  borderRadius: '16px',
+                  fontSize: '1.05rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  borderColor: 'var(--neon-orange)',
+                  color: 'var(--neon-orange)',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  boxSizing: 'border-box',
+                }}
+              >
+                🏍️ Trip Settings ▾
+              </button>
+
+              {tripDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '76px',
+                  right: 0,
+                  width: '260px',
+                  background: 'rgba(19, 19, 26, 0.95)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '16px',
+                  padding: '16px',
+                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)',
+                  zIndex: 1000,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>👤 Profile:</span>
+                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>Rider</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Consumption:</span>
+                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{consumption} L/100km</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Tank Capacity:</span>
+                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{fillSize} L</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>🧭 Search Radius:</span>
+                    <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{searchRadius} km</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettingsModal(true);
+                      setTripDropdownOpen(false);
+                    }}
+                    className="glove-target action-btn"
+                    style={{
+                      width: '100%',
+                      minHeight: '44px',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      borderRadius: '10px',
+                      marginTop: '8px',
+                    }}
+                  >
+                    ⚙️ Edit Config
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -360,76 +441,13 @@ export default function App() {
         </button>
 
         <div className="main-layout">
-          {/* Controls Sidebar (Search & Filters & Settings trigger) */}
+          {/* Controls Sidebar (Search & Filters) */}
           <aside className={`controls-sidebar collapsible-container ${mobileFiltersExpanded ? '' : 'collapsed'}`}>
-            {/* Settings trigger card */}
-            <section className="rider-settings-container">
-              <div className="filter-header" style={{ marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏍️ Trip Settings</h3>
-              </div>
-              <div className="rider-settings-details" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flexGrow: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>👤 Profile:</span>
-                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>Rider</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>⛽ Avg. Consumption:</span>
-                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{consumption} L/100km</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>⛽ Tank Capacity:</span>
-                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{fillSize} L</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>🧭 Search Radius:</span>
-                  <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{searchRadius} km</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowSettingsModal(true);
-                  if (window.innerWidth <= 1024) {
-                    setMobileFiltersExpanded(false);
-                  }
-                }}
-                className="glove-target action-btn settings-trigger-btn"
-                style={{ width: '100%', minHeight: '56px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, marginTop: '16px' }}
-              >
-                ⚙️ Edit Config
-              </button>
-            </section>
-
-            <SearchControls
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              suggestions={suggestions}
-              showSuggestions={showSuggestions}
-              setShowSuggestions={setShowSuggestions}
-              gpsActive={gpsActive}
-              loading={loading}
-              onTextSearch={handleTextSearch}
-              onSelectSuggestion={handleSelectSuggestion}
-              onGpsSearch={handleGpsSearch}
-              onClearGps={handleClearGps}
-              onManualRefresh={handleManualRefresh}
-            />
-
             <FilterControls
-              filteredStationsCount={filteredStations.length}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              filterBrand={filterBrand}
-              setFilterBrand={setFilterBrand}
               filterService={filterService}
-              setFilterService={setFilterService}
               filterInStockOnly={filterInStockOnly}
               setFilterInStockOnly={setFilterInStockOnly}
-              minPrice={minPrice}
-              setMinPrice={setMinPrice}
-              maxPrice={maxPrice}
-              setMaxPrice={setMaxPrice}
-              brandsList={brandsList}
+              onOpenServicesModal={() => setServicesModalOpen(true)}
             />
           </aside>
 
@@ -441,9 +459,17 @@ export default function App() {
               </div>
             )}
             
-            {gpsActive && gpsCoords && (
+            {(gpsActive && gpsCoords) ? (
               <div className="search-active-message">
-                📍 Showing stations within {searchRadius}km of location ({gpsCoords.lat.toFixed(4)}, {gpsCoords.lon.toFixed(4)})
+                📍 Showing {filteredStations.length} stations within {searchRadius}km of location ({gpsCoords.lat.toFixed(4)}, {gpsCoords.lon.toFixed(4)})
+              </div>
+            ) : submittedSearchQuery ? (
+              <div className="search-active-message" style={{ color: 'var(--neon-blue)', borderColor: 'var(--neon-blue)', background: 'rgba(0, 240, 255, 0.05)' }}>
+                🔍 Found {filteredStations.length} stations near "{submittedSearchQuery}"
+              </div>
+            ) : (
+              <div className="search-active-message" style={{ color: 'var(--neon-blue)', borderColor: 'var(--neon-blue)', background: 'rgba(0, 240, 255, 0.05)' }}>
+                ⛽ Found {filteredStations.length} stations
               </div>
             )}
 
@@ -552,6 +578,24 @@ export default function App() {
         onUpdateFillSize={handleUpdateFillSize}
         onUpdateConsumption={handleUpdateConsumption}
         onUpdateSearchRadius={handleUpdateSearchRadius}
+        gpsActive={gpsActive}
+        loading={loading}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        suggestions={suggestions}
+        showSuggestions={showSuggestions}
+        setShowSuggestions={setShowSuggestions}
+        onGpsSearch={handleGpsSearch}
+        onClearGps={handleClearGps}
+        onTextSearch={handleTextSearch}
+        onSelectSuggestion={handleSelectSuggestion}
+        onManualRefresh={handleManualRefresh}
+      />
+      <ServicesModal
+        isOpen={servicesModalOpen}
+        onClose={() => setServicesModalOpen(false)}
+        filterService={filterService}
+        setFilterService={setFilterService}
       />
     </div>
   );

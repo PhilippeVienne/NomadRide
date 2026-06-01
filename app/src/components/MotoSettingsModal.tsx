@@ -1,3 +1,5 @@
+import { FormEvent } from 'react';
+import { LocationSuggestion } from '../services/apiService';
 
 interface MotoSettingsModalProps {
   isOpen: boolean;
@@ -8,6 +10,19 @@ interface MotoSettingsModalProps {
   onUpdateFillSize: (val: number) => void;
   onUpdateConsumption: (val: number) => void;
   onUpdateSearchRadius: (val: number) => void;
+  // Location Override
+  gpsActive: boolean;
+  loading: boolean;
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  suggestions: LocationSuggestion[];
+  showSuggestions: boolean;
+  setShowSuggestions: (show: boolean) => void;
+  onGpsSearch: () => void;
+  onClearGps: () => void;
+  onTextSearch: (e: FormEvent) => void;
+  onSelectSuggestion: (s: LocationSuggestion) => void;
+  onManualRefresh: () => void;
 }
 
 export default function MotoSettingsModal({
@@ -19,6 +34,18 @@ export default function MotoSettingsModal({
   onUpdateFillSize,
   onUpdateConsumption,
   onUpdateSearchRadius,
+  gpsActive,
+  loading,
+  searchQuery,
+  setSearchQuery,
+  suggestions,
+  showSuggestions,
+  setShowSuggestions,
+  onGpsSearch,
+  onClearGps,
+  onTextSearch,
+  onSelectSuggestion,
+  onManualRefresh,
 }: MotoSettingsModalProps) {
   if (!isOpen) return null;
 
@@ -51,17 +78,170 @@ export default function MotoSettingsModal({
         </header>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+          {/* ── Location Override ── */}
+          <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '20px' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
+              Override Location Mode
+            </p>
+
+            {/* GPS / Search toggle */}
+            <div style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '14px', marginBottom: '12px' }}>
+              <button
+                type="button"
+                onClick={onGpsSearch}
+                style={{
+                  flex: 1,
+                  minHeight: '48px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: gpsActive ? 'var(--neon-orange)' : 'transparent',
+                  color: gpsActive ? '#000' : 'var(--text-secondary)',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                🎯 GPS Mode
+              </button>
+              <button
+                type="button"
+                onClick={onClearGps}
+                style={{
+                  flex: 1,
+                  minHeight: '48px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: !gpsActive ? 'var(--neon-orange)' : 'transparent',
+                  color: !gpsActive ? '#000' : 'var(--text-secondary)',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                🔍 Search Mode
+              </button>
+            </div>
+
+            {/* Conditional body */}
+            {gpsActive ? (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{
+                  flexGrow: 1,
+                  minHeight: '52px',
+                  background: 'rgba(255, 107, 0, 0.1)',
+                  border: '1px solid var(--neon-orange)',
+                  borderRadius: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingLeft: '16px',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                }}>
+                  📡 GPS Tracking Active
+                </div>
+                <button
+                  type="button"
+                  onClick={onManualRefresh}
+                  disabled={loading}
+                  title="Refresh GPS"
+                  style={{
+                    width: '52px', height: '52px', borderRadius: '50%',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(19,19,26,0.65)',
+                    color: '#fff', fontSize: '1.1rem',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', flexShrink: 0, padding: 0,
+                  }}
+                >
+                  <span style={{ display: 'inline-block' }} className={loading ? 'spinning' : ''}>🔄</span>
+                </button>
+              </div>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <form onSubmit={onTextSearch} style={{ display: 'flex', gap: '10px' }}>
+                  <input
+                    type="text"
+                    placeholder="Enter city or zip code…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setShowSuggestions(suggestions.length > 0)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    id="modal-location-search-input"
+                    aria-label="Search location"
+                    autoComplete="off"
+                    style={{
+                      flexGrow: 1,
+                      minHeight: '52px',
+                      paddingLeft: '16px',
+                      paddingRight: '48px',
+                      borderRadius: '14px',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      background: 'rgba(9,9,11,0.7)',
+                      color: '#fff',
+                      fontSize: '0.95rem',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      minHeight: '52px',
+                      paddingInline: '16px',
+                      borderRadius: '14px',
+                      border: '1px solid var(--neon-orange)',
+                      background: 'transparent',
+                      color: 'var(--neon-orange)',
+                      fontSize: '1rem',
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    🔍
+                  </button>
+                </form>
+                {showSuggestions && suggestions.length > 0 && (
+                  <ul
+                    className="autocomplete-suggestions"
+                    style={{ position: 'absolute', top: '58px', left: 0, right: 0, zIndex: 1200 }}
+                    role="listbox"
+                  >
+                    {suggestions.map((s, i) => (
+                      <li
+                        key={i}
+                        onClick={() => { onSelectSuggestion(s); onClose(); }}
+                        className="autocomplete-suggestion-item glove-target"
+                        role="option"
+                      >
+                        📍 {s.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ── Moto Settings ── */}
           <div className="pref-control-group">
             <span className="pref-label">Tank Fill Size</span>
             <div className="pref-adjuster">
-              <button
-                type="button"
-                onClick={() => onUpdateFillSize(Math.max(2, fillSize - 1))}
-                className="glove-target pref-btn-adjust minus"
-                aria-label="Decrease tank fill size"
-              >
-                -
-              </button>
+              <button type="button" onClick={() => onUpdateFillSize(Math.max(2, fillSize - 1))} className="glove-target pref-btn-adjust minus" aria-label="Decrease tank fill size">-</button>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', flexGrow: 1 }}>
                 <input
                   type="number"
@@ -73,28 +253,14 @@ export default function MotoSettingsModal({
                 />
                 <span className="pref-unit">L</span>
               </div>
-              <button
-                type="button"
-                onClick={() => onUpdateFillSize(Math.min(50, fillSize + 1))}
-                className="glove-target pref-btn-adjust plus"
-                aria-label="Increase tank fill size"
-              >
-                +
-              </button>
+              <button type="button" onClick={() => onUpdateFillSize(Math.min(50, fillSize + 1))} className="glove-target pref-btn-adjust plus" aria-label="Increase tank fill size">+</button>
             </div>
           </div>
 
           <div className="pref-control-group">
             <span className="pref-label">Consumption</span>
             <div className="pref-adjuster">
-              <button
-                type="button"
-                onClick={() => onUpdateConsumption(Math.max(1, consumption - 0.5))}
-                className="glove-target pref-btn-adjust minus"
-                aria-label="Decrease fuel consumption rate"
-              >
-                -
-              </button>
+              <button type="button" onClick={() => onUpdateConsumption(Math.max(1, consumption - 0.5))} className="glove-target pref-btn-adjust minus" aria-label="Decrease fuel consumption rate">-</button>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', flexGrow: 1 }}>
                 <input
                   type="number"
@@ -107,28 +273,14 @@ export default function MotoSettingsModal({
                 />
                 <span className="pref-unit">L/100km</span>
               </div>
-              <button
-                type="button"
-                onClick={() => onUpdateConsumption(Math.min(20, consumption + 0.5))}
-                className="glove-target pref-btn-adjust plus"
-                aria-label="Increase fuel consumption rate"
-              >
-                +
-              </button>
+              <button type="button" onClick={() => onUpdateConsumption(Math.min(20, consumption + 0.5))} className="glove-target pref-btn-adjust plus" aria-label="Increase fuel consumption rate">+</button>
             </div>
           </div>
 
           <div className="pref-control-group">
             <span className="pref-label">Search Radius</span>
             <div className="pref-adjuster">
-              <button
-                type="button"
-                onClick={() => onUpdateSearchRadius(Math.max(5, searchRadius - 5))}
-                className="glove-target pref-btn-adjust minus"
-                aria-label="Decrease search radius"
-              >
-                -
-              </button>
+              <button type="button" onClick={() => onUpdateSearchRadius(Math.max(5, searchRadius - 5))} className="glove-target pref-btn-adjust minus" aria-label="Decrease search radius">-</button>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', flexGrow: 1 }}>
                 <input
                   type="number"
@@ -140,16 +292,10 @@ export default function MotoSettingsModal({
                 />
                 <span className="pref-unit">km</span>
               </div>
-              <button
-                type="button"
-                onClick={() => onUpdateSearchRadius(Math.min(100, searchRadius + 5))}
-                className="glove-target pref-btn-adjust plus"
-                aria-label="Increase search radius"
-              >
-                +
-              </button>
+              <button type="button" onClick={() => onUpdateSearchRadius(Math.min(100, searchRadius + 5))} className="glove-target pref-btn-adjust plus" aria-label="Increase search radius">+</button>
             </div>
           </div>
+
         </div>
 
         <footer className="modal-footer">
