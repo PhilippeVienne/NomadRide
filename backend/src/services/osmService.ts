@@ -68,6 +68,7 @@ interface OsmFuelStation {
   brand?: string;
   operator?: string;
   name?: string;
+  ref?: string;
 }
 
 // Cache structure: key = "lat_lon_radius" rounded tile, value = OSM stations
@@ -149,6 +150,7 @@ async function fetchOsmFuelStations(
         brand: el.tags?.brand || el.tags?.['brand:en'] || undefined,
         operator: el.tags?.operator || undefined,
         name: el.tags?.name || undefined,
+        ref: el.tags?.['ref:FR:prix-carburants'] || undefined,
       };
     }).filter((s: OsmFuelStation) => s.lat !== undefined && s.lon !== undefined);
 
@@ -171,10 +173,11 @@ export async function lookupBrand(
   stationLon: number,
   searchCenterLat: number,
   searchCenterLon: number,
-  searchRadiusKm: number
+  searchRadiusKm: number,
+  stationId?: number
 ): Promise<string | undefined> {
   const osmStations = await fetchOsmFuelStations(searchCenterLat, searchCenterLon, searchRadiusKm);
-  return findNearestBrand(osmStations, stationLat, stationLon);
+  return findNearestBrand(osmStations, stationLat, stationLon, stationId);
 }
 
 /**
@@ -182,7 +185,7 @@ export async function lookupBrand(
  * Fetches OSM data once for the search area, then matches each station.
  */
 export async function enrichStationsWithBrands(
-  stations: Array<{ latitude: string; longitude: string; brand?: string }>,
+  stations: Array<{ id: number; latitude: string; longitude: string; brand?: string }>,
   searchCenterLat: number,
   searchCenterLon: number,
   searchRadiusKm: number
@@ -201,7 +204,7 @@ export async function enrichStationsWithBrands(
 
     if (isNaN(sLat) || isNaN(sLon)) continue;
 
-    const brand = findNearestBrand(osmStations, sLat, sLon);
+    const brand = findNearestBrand(osmStations, sLat, sLon, station.id);
     if (brand) {
       station.brand = brand;
       matched++;
@@ -213,15 +216,25 @@ export async function enrichStationsWithBrands(
 }
 
 /**
- * Find the brand of the nearest OSM fuel station within 500m tolerance.
- * The government API coordinates are stored as integers (lat*100000), which
- * introduces rounding imprecision of ~10-50m vs OSM's precise coordinates.
+ * Find the brand of the nearest OSM fuel station within 150m tolerance.
+ * First tries to match using the ref:FR:prix-carburants ID if available.
  */
 function findNearestBrand(
   osmStations: OsmFuelStation[],
   lat: number,
-  lon: number
+  lon: number,
+  id?: number
 ): string | undefined {
+  // 1. Try matching by exact French government station ID if provided
+  if (id !== undefined) {
+    const idStr = String(id);
+    const exactMatch = osmStations.find(osm => osm.ref === idStr);
+    if (exactMatch && (exactMatch.brand || exactMatch.operator || exactMatch.name)) {
+      return exactMatch.brand || exactMatch.operator || exactMatch.name;
+    }
+  }
+
+  // 2. Fall back to proximity matching within 150m
   const MAX_MATCH_DISTANCE_KM = 0.15; // 150 meters
   let bestDistance = Infinity;
   let bestBrand: string | undefined;
