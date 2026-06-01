@@ -4,7 +4,7 @@
   "description": "NomadRide FaaS Backend",
   "main": "dist/lambda.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "node --import tsx --watch src/server.ts",
     "build": "node build.mjs",
     "test": "vitest",
     "lint": "eslint src/"
