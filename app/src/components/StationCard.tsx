@@ -5,6 +5,7 @@ import {
   getStationBrand,
   ServiceInfo
 } from '../utils/stationUtils';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface StationCardProps {
   station: FuelStation;
@@ -13,6 +14,7 @@ interface StationCardProps {
 }
 
 export default function StationCard({ station, fuelType, index }: StationCardProps) {
+  const { t, language } = useTranslation();
   const price = station[`${fuelType}_prix` as keyof FuelStation] as number | undefined;
   const updateTime = station[`${fuelType}_maj` as keyof FuelStation] as string;
   const ruptureType = station[`${fuelType}_rupture_type` as keyof FuelStation] as string | undefined;
@@ -23,8 +25,8 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
   const isCheapest = index === 0 && !ruptureType && station.distance === undefined;
   
   const rankText = ruptureType 
-    ? `🚫 OUT OF STOCK` 
-    : (isBestValue ? '🏆 BEST VALUE' : (isCheapest ? '🏆 CHEAPEST' : `#${index + 1}`));
+    ? t('card.rupture') 
+    : (isBestValue ? t('card.bestValue') : (isCheapest ? t('card.cheapest') : `#${index + 1}`));
 
   // Parse coordinates for Google Maps link fallback
   const latVal = parseFloat(station.latitude) / 100000;
@@ -52,7 +54,7 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
       <div className="card-top">
         <div className="price-tag">
           {ruptureType ? (
-            <span className="price-rupture">RUPTURE</span>
+            <span className="price-rupture">{t('card.rupture')}</span>
           ) : price ? (
             <>
               <span className="price-integer">{priceInteger}</span>
@@ -95,13 +97,13 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
         <div className="card-metrics-row">
           {station.total_cost !== undefined && (
             <div className="metric-box cost" title="Estimated fill cost (9L fill + detour cost)">
-              <span className="metric-label">TOTAL COST</span>
+              <span className="metric-label">{t('card.totalCost')}</span>
               <span className="metric-value">🪙 {station.total_cost.toFixed(2)} €</span>
             </div>
           )}
           {station.distance !== undefined && (
             <div className="metric-box distance" title="Distance to station">
-              <span className="metric-label">DISTANCE</span>
+              <span className="metric-label">{t('card.distance')}</span>
               <span className="metric-value">📍 {station.distance.toFixed(1)} km</span>
             </div>
           )}
@@ -117,7 +119,7 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
           const uniqueServices: ServiceInfo[] = [];
           const seenLabels = new Set<string>();
           for (const rawService of station.services_service) {
-            const parsed = parseServiceTag(rawService);
+            const parsed = parseServiceTag(rawService, language);
             if (!seenLabels.has(parsed.label)) {
               seenLabels.add(parsed.label);
               uniqueServices.push(parsed);
@@ -134,7 +136,7 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
               ))}
               {uniqueServices.length > 4 && (
                 <span className="service-tag more" title={uniqueServices.slice(4).map(s => s.label).join(', ')}>
-                  +{uniqueServices.length - 4} more
+                  {t('card.more', { count: uniqueServices.length - 4 })}
                 </span>
               )}
             </div>
@@ -146,26 +148,26 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
         {ruptureType ? (
           ruptureDebut && (
             <div className="rupture-badge" title={`Shortage started on ${new Date(ruptureDebut).toLocaleString()}`}>
-              ⚠️ Since {formatLastUpdated(ruptureDebut)}
+              {t('card.since', { time: formatLastUpdated(ruptureDebut, language) })}
             </div>
           )
         ) : (
           updateTime && (
             <div className="update-time-badge" title={`Updated on ${new Date(updateTime).toLocaleString()}`}>
-              🕒 {formatLastUpdated(updateTime)}
+              {t('card.updated', { time: formatLastUpdated(updateTime, language) })}
             </div>
           )
         )}
 
         {station.horaires_automate_24_24 === 'Oui' && (
           <div className="automate-24-badge" title="24/24 Automate Available">
-            ⚡ 24/24
+            {t('card.automate24')}
           </div>
         )}
 
         {station.freshness_penalty !== undefined && station.freshness_penalty > 0 && (
           <div className="penalty-badge" title={`Staleness penalty applied: +${station.freshness_penalty.toFixed(3)} €/L`}>
-            🕒 Staleness: +{station.freshness_penalty.toFixed(3)} €/L
+            {t('card.staleness', { penalty: station.freshness_penalty.toFixed(3) })}
           </div>
         )}
       </div>
@@ -178,9 +180,10 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
           rel="noopener noreferrer"
           className="glove-target map-action-link"
         >
-          🗺️ View on Map
+          {t('card.viewMap')}
         </a>
       </div>
     </article>
   );
 }
+

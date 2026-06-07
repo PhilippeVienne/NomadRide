@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface WalletModuleProps {
   onNavigateToPitstop: () => void;
 }
 
 export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps) {
+  const { t } = useTranslation();
   const [fuelPrice, setFuelPrice] = useState<number>(1.90);
   const [tollClass, setTollClass] = useState<number>(5);
 
@@ -21,29 +23,29 @@ export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps)
     <div className="preview-dashboard">
       <header className="module-header">
         <div className="module-title">
-          <h2>🪙 Wallet Expense Calculator</h2>
-          <p>Calculate total road trip cost including fuel, tolls, and wear & tear</p>
+          <h2>{t('wallet.title')}</h2>
+          <p>{t('wallet.subtitle')}</p>
         </div>
       </header>
 
       <div className="mock-grid">
         <div className="mock-card">
           <div className="mock-title-row">
-            <h3>Estimated Trip Cost</h3>
-            <span className="mock-badge green">Cost-Optimized</span>
+            <h3>{t('wallet.tripCost')}</h3>
+            <span className="mock-badge green">{t('wallet.costOptimized')}</span>
           </div>
           <div style={{ textAlign: 'center', margin: '20px 0' }}>
             <span style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--neon-green)', textShadow: 'var(--shadow-neon-green)' }}>
               {totalCost.toFixed(2)} €
             </span>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
-              Based on {mockDistance}km Route & Custom Settings
+              {t('wallet.costBasedOn', { distance: mockDistance })}
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                <span>Fuel Cost</span>
+                <span>{t('wallet.fuelCost')}</span>
                 <span>{calculatedFuelCost.toFixed(2)} €</span>
               </div>
               <div className="mock-progress-container">
@@ -55,7 +57,7 @@ export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps)
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                <span>Tolls</span>
+                <span>{t('wallet.tolls')}</span>
                 <span>{calculatedTollCost.toFixed(2)} €</span>
               </div>
               <div className="mock-progress-container">
@@ -67,7 +69,7 @@ export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps)
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                <span>Tire & Chain Wear (Detour fee)</span>
+                <span>{t('wallet.wear')}</span>
                 <span>{calculatedWearCost.toFixed(2)} €</span>
               </div>
               <div className="mock-progress-container">
@@ -83,12 +85,12 @@ export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps)
         <div className="mock-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <div className="mock-title-row">
-              <h3>Wallet Settings</h3>
-              <span className="mock-badge orange">Interactive</span>
+              <h3>{t('wallet.settings')}</h3>
+              <span className="mock-badge orange">{t('wallet.interactive')}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>FUEL PRICE ASSUMPTION</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('wallet.fuelPriceAssumption')}</span>
                 <div className="mock-slider-row">
                   <span className="mock-slider-val">{fuelPrice.toFixed(2)} €/L</span>
                   <input
@@ -103,14 +105,14 @@ export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps)
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>MOTO TOLL CLASS</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('wallet.motoTollClass')}</span>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                   <button
                     onClick={() => setTollClass(5)}
                     className={`glove-target selector-btn ${tollClass === 5 ? 'active' : ''}`}
                     style={{ flex: 1, minHeight: '44px', height: '44px', fontSize: '0.85rem' }}
                   >
-                    Class 5 (Solo)
+                    {t('wallet.class5')}
                   </button>
                   <button
                     onClick={() => setTollClass(1)}
@@ -125,7 +127,7 @@ export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps)
                       border: 'none',
                     }}
                   >
-                    Class 1 (Sidecar)
+                    {t('wallet.class1')}
                   </button>
                 </div>
               </div>
@@ -133,10 +135,11 @@ export default function WalletModule({ onNavigateToPitstop }: WalletModuleProps)
           </div>
 
           <button onClick={onNavigateToPitstop} className="glove-target action-btn" style={{ marginTop: '20px' }}>
-            Sync with Fuel Database
+            {t('wallet.syncButton')}
           </button>
         </div>
       </div>
     </div>
   );
 }
+

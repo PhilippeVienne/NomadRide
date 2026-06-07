@@ -1,3 +1,5 @@
+import { useTranslation } from '../i18n/LanguageContext';
+
 interface FilterControlsProps {
   filterService: string;
   filterInStockOnly: boolean;
@@ -11,15 +13,16 @@ export default function FilterControls({
   setFilterInStockOnly,
   onOpenServicesModal,
 }: FilterControlsProps) {
+  const { t } = useTranslation();
 
   return (
-    <section className="filter-controls-container" aria-label="Filter Controls" style={{ width: '100%' }}>
+    <section className="filter-controls-container" aria-label={t('pitstop.filters')} style={{ width: '100%' }}>
 
       {/* Simplified Filters Grid */}
       <div className="filter-controls-row" style={{ display: 'flex', gap: '20px', alignItems: 'start' }}>
         {/* Trigger Services Modal Button */}
         <div className="filter-control-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
-          <span className="filter-label">Services Filter</span>
+          <span className="filter-label">{t('pitstop.servicesFilterLabel')}</span>
           <button
             type="button"
             onClick={onOpenServicesModal}
@@ -38,15 +41,15 @@ export default function FilterControls({
               borderRadius: '14px',
             }}
           >
-            🧼 Services: {filterService === 'all' ? 'All' : filterService.toUpperCase()}
+            {t('pitstop.servicesButton', { service: filterService === 'all' ? t('pitstop.allServices') : filterService.toUpperCase() })}
           </button>
         </div>
 
         {/* Availability Toggle */}
         <div className="filter-control-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-          <span className="filter-label">Availability</span>
+          <span className="filter-label">{t('pitstop.availabilityLabel')}</span>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', minHeight: '56px', background: 'rgba(255,255,255,0.03)', padding: '0 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <span style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 600 }}>Include Shortages</span>
+            <span style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 600 }}>{t('pitstop.includeShortages')}</span>
             <input
               type="checkbox"
               checked={!filterInStockOnly}
@@ -59,3 +62,4 @@ export default function FilterControls({
     </section>
   );
 }
+

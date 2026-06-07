@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
 import { LocationSuggestion } from '../services/apiService';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface MotoSettingsModalProps {
   isOpen: boolean;
@@ -47,6 +48,8 @@ export default function MotoSettingsModal({
   onSelectSuggestion,
   onManualRefresh,
 }: MotoSettingsModalProps) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   const handleBlurFillSize = () => {
@@ -71,8 +74,8 @@ export default function MotoSettingsModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <header className="modal-header">
-          <h3>🏍️ Moto Settings</h3>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Close Settings">
+          <h3>{t('settings.title')}</h3>
+          <button className="modal-close-btn" onClick={onClose} aria-label={t('settings.close')}>
             ✕
           </button>
         </header>
@@ -82,7 +85,7 @@ export default function MotoSettingsModal({
           {/* ── Location Override ── */}
           <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '20px' }}>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
-              Override Location Mode
+              {t('settings.locationMode')}
             </p>
 
             {/* GPS / Search toggle */}
@@ -107,7 +110,7 @@ export default function MotoSettingsModal({
                   transition: 'all 0.2s ease',
                 }}
               >
-                🎯 GPS Mode
+                {t('settings.gpsMode')}
               </button>
               <button
                 type="button"
@@ -129,7 +132,7 @@ export default function MotoSettingsModal({
                   transition: 'all 0.2s ease',
                 }}
               >
-                🔍 Search Mode
+                {t('settings.searchMode')}
               </button>
             </div>
 
@@ -149,7 +152,7 @@ export default function MotoSettingsModal({
                   fontSize: '0.9rem',
                   fontWeight: 600,
                 }}>
-                  📡 GPS Tracking Active
+                  {t('settings.gpsActive')}
                 </div>
                 <button
                   type="button"
@@ -173,7 +176,7 @@ export default function MotoSettingsModal({
                 <form onSubmit={onTextSearch} style={{ display: 'flex', gap: '10px' }}>
                   <input
                     type="text"
-                    placeholder="Enter city or zip code…"
+                    placeholder={t('settings.placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setShowSuggestions(suggestions.length > 0)}
@@ -239,7 +242,7 @@ export default function MotoSettingsModal({
 
           {/* ── Moto Settings ── */}
           <div className="pref-control-group">
-            <span className="pref-label">Tank Fill Size</span>
+            <span className="pref-label">{t('settings.tankSize')}</span>
             <div className="pref-adjuster">
               <button type="button" onClick={() => onUpdateFillSize(Math.max(2, fillSize - 1))} className="glove-target pref-btn-adjust minus" aria-label="Decrease tank fill size">-</button>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', flexGrow: 1 }}>
@@ -258,7 +261,7 @@ export default function MotoSettingsModal({
           </div>
 
           <div className="pref-control-group">
-            <span className="pref-label">Consumption</span>
+            <span className="pref-label">{t('settings.consumption')}</span>
             <div className="pref-adjuster">
               <button type="button" onClick={() => onUpdateConsumption(Math.max(1, consumption - 0.5))} className="glove-target pref-btn-adjust minus" aria-label="Decrease fuel consumption rate">-</button>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', flexGrow: 1 }}>
@@ -278,7 +281,7 @@ export default function MotoSettingsModal({
           </div>
 
           <div className="pref-control-group">
-            <span className="pref-label">Search Radius</span>
+            <span className="pref-label">{t('settings.radius')}</span>
             <div className="pref-adjuster">
               <button type="button" onClick={() => onUpdateSearchRadius(Math.max(5, searchRadius - 5))} className="glove-target pref-btn-adjust minus" aria-label="Decrease search radius">-</button>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', flexGrow: 1 }}>
@@ -300,10 +303,11 @@ export default function MotoSettingsModal({
 
         <footer className="modal-footer">
           <button className="glove-target modal-action-btn" onClick={onClose}>
-            Apply Settings
+            {t('settings.apply')}
           </button>
         </footer>
       </div>
     </div>
   );
 }
+

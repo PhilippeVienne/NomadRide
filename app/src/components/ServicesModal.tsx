@@ -1,4 +1,6 @@
 
+import { useTranslation } from '../i18n/LanguageContext';
+
 interface ServicesModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,21 +14,23 @@ export default function ServicesModal({
   filterService,
   setFilterService,
 }: ServicesModalProps) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
-  const servicesList = [
-    { key: 'air', label: 'Air 🛞' },
-    { key: 'wash', label: 'Wash 🧼' },
-    { key: 'gas', label: 'Gas 💨' },
-    { key: 'shop', label: 'Shop 🏪' },
-    { key: 'food', label: 'Food 🍔' },
-    { key: 'parcel', label: 'Parcel 📦' },
-    { key: 'wifi', label: 'Wifi 🛜' },
-    { key: 'wc', label: 'WC 🚻' },
-    { key: 'shower', label: 'Shower 🚿' },
-    { key: 'repair', label: 'Repair 🛠️' },
-    { key: '24/7 pay', label: '24/7 Pay 💳' },
-    { key: 'rental', label: 'Rental 🚗' },
+  const servicesList: { key: string; label: string }[] = [
+    { key: 'air', label: t('services.air') },
+    { key: 'wash', label: t('services.wash') },
+    { key: 'gas', label: t('services.gas') },
+    { key: 'shop', label: t('services.shop') },
+    { key: 'food', label: t('services.food') },
+    { key: 'parcel', label: t('services.parcel') },
+    { key: 'wifi', label: t('services.wifi') },
+    { key: 'wc', label: t('services.wc') },
+    { key: 'shower', label: t('services.shower') },
+    { key: 'repair', label: t('services.repair') },
+    { key: '24/7 pay', label: t('services.pay') },
+    { key: 'rental', label: t('services.rental') },
   ];
 
   return (
@@ -34,7 +38,7 @@ export default function ServicesModal({
       <div className="modal-content" style={{ maxWidth: '400px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--neon-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            🧼 Station Services
+            {t('services.title')}
           </h3>
           <button
             onClick={onClose}
@@ -53,7 +57,7 @@ export default function ServicesModal({
         </div>
 
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
-          Select a service to filter fuel stations:
+          {t('services.subtitle')}
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto', paddingRight: '6px' }}>
@@ -76,7 +80,7 @@ export default function ServicesModal({
               paddingLeft: '16px',
             }}
           >
-            All Services (No Filter)
+            {t('services.all')}
           </button>
 
           {servicesList.map((srv) => (
@@ -123,13 +127,15 @@ export default function ServicesModal({
             cursor: 'pointer',
           }}
         >
-          Close & Apply
+          {t('services.close')}
         </button>
       </div>
     </div>
   );
 }
 
+// Keep the utility function
 function qbKey(key: string) {
   return key;
 }
+

@@ -1,3 +1,5 @@
+import { useTranslation } from '../i18n/LanguageContext';
+
 export type ActiveModule = 'explore' | 'shelter' | 'pitstop' | 'wallet' | 'radar';
 
 interface SidebarProps {
@@ -6,20 +8,22 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
+  const { t, language, setLanguage } = useTranslation();
+
   const navItems: { id: ActiveModule; label: string; icon: string }[] = [
-    { id: 'explore', label: 'Explore', icon: '🧭' },
-    { id: 'shelter', label: 'Shelter', icon: '🛖' },
-    { id: 'pitstop', label: 'Pit-Stop', icon: '⛽' },
-    { id: 'wallet', label: 'Wallet', icon: '🪙' },
-    { id: 'radar', label: 'Radar', icon: '📡' },
+    { id: 'explore', label: t('sidebar.explore'), icon: '🧭' },
+    { id: 'shelter', label: t('sidebar.shelter'), icon: '🛖' },
+    { id: 'pitstop', label: t('sidebar.pitstop'), icon: '⛽' },
+    { id: 'wallet', label: t('sidebar.wallet'), icon: '🪙' },
+    { id: 'radar', label: t('sidebar.radar'), icon: '📡' },
   ];
 
   return (
     <aside className="sidebar">
       <div className="logo-container">
         <div className="logo-text">
-          <h1>NomadRide</h1>
-          <span>Rider Companion</span>
+          <h1>{t('sidebar.title')}</h1>
+          <span>{t('sidebar.subtitle')}</span>
         </div>
       </div>
 
@@ -36,6 +40,26 @@ export default function Sidebar({ activeModule, setActiveModule }: SidebarProps)
           </button>
         ))}
       </nav>
+
+      <div className="language-selector" role="group" aria-label="Language Selector">
+        <button
+          id="lang-btn-fr"
+          type="button"
+          className={`lang-btn glove-target ${language === 'fr' ? 'active' : ''}`}
+          onClick={() => setLanguage('fr')}
+        >
+          FR
+        </button>
+        <button
+          id="lang-btn-en"
+          type="button"
+          className={`lang-btn glove-target ${language === 'en' ? 'active' : ''}`}
+          onClick={() => setLanguage('en')}
+        >
+          EN
+        </button>
+      </div>
     </aside>
   );
 }
+

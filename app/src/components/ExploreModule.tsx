@@ -1,31 +1,35 @@
+import { useTranslation } from '../i18n/LanguageContext';
+
 interface ExploreModuleProps {
   onNavigateToPitstop: () => void;
 }
 
 export default function ExploreModule({ onNavigateToPitstop }: ExploreModuleProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="preview-dashboard">
       <header className="module-header">
         <div className="module-title">
-          <h2>🧭 Explore Navigation</h2>
-          <p>Curated twisty motorcycle routes & elevation planning</p>
+          <h2>{t('explore.title')}</h2>
+          <p>{t('explore.subtitle')}</p>
         </div>
       </header>
 
       <div className="mock-grid">
         <div className="mock-card">
           <div className="mock-title-row">
-            <h3>Route Overview</h3>
-            <span className="mock-badge green">Scenic Level: Extreme</span>
+            <h3>{t('explore.routeOverview')}</h3>
+            <span className="mock-badge green">{t('explore.scenicLevel', { level: t('explore.scenicExtreme') })}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>From</span>
-              <span style={{ fontWeight: 700 }}>Toulouse Center</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('explore.from')}</span>
+              <span style={{ fontWeight: 700 }}>{t('explore.toulouseCenter')}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>To</span>
-              <span style={{ fontWeight: 700 }}>Pyrenees Loop (Col du Tourmalet)</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('explore.to')}</span>
+              <span style={{ fontWeight: 700 }}>{t('explore.pyreneesLoop')}</span>
             </div>
           </div>
 
@@ -44,20 +48,20 @@ export default function ExploreModule({ onNavigateToPitstop }: ExploreModuleProp
 
         <div className="mock-card">
           <div className="mock-title-row">
-            <h3>Route Metrics</h3>
-            <span className="mock-badge orange">265 km total</span>
+            <h3>{t('explore.routeMetrics')}</h3>
+            <span className="mock-badge orange">{t('explore.totalDistance', { distance: 265 })}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Twistiness Index</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('explore.twistiness')}</span>
               <span style={{ color: 'var(--neon-green)', fontWeight: 800, fontSize: '1.2rem' }}>⚡ 9.4/10</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Elevation Gain</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('explore.elevationGain')}</span>
               <span style={{ fontWeight: 700 }}>⛰️ +4,820m</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Estimated Ride Time</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('explore.rideTime')}</span>
               <span style={{ fontWeight: 700 }}>⏱️ 4h 12m</span>
             </div>
           </div>
@@ -66,8 +70,8 @@ export default function ExploreModule({ onNavigateToPitstop }: ExploreModuleProp
 
       <div className="mock-card">
         <div className="mock-title-row">
-          <h3>Elevation Profile & Mountain Passes</h3>
-          <span className="mock-badge green">Tourmalet Pass Open</span>
+          <h3>{t('explore.elevationProfile')}</h3>
+          <span className="mock-badge green">{t('explore.tourmaletOpen')}</span>
         </div>
         <div className="mock-elevation-chart">
           <div className="mock-elevation-bar" style={{ height: '20%' }} title="Toulouse: 150m"></div>
@@ -88,9 +92,10 @@ export default function ExploreModule({ onNavigateToPitstop }: ExploreModuleProp
 
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
         <button onClick={onNavigateToPitstop} className="glove-target action-btn" style={{ flex: '1', minWidth: '200px' }}>
-          📍 Check Nearby Fuel Stations
+          {t('explore.checkStations')}
         </button>
       </div>
     </div>
   );
 }
+

@@ -2296,6 +2296,52 @@ h1, h2, h3, h4, .font-display {
   border-bottom: 2px solid var(--neon-blue);
 }
 
+/* --- Language Selector --- */
+.language-selector {
+  display: flex;
+  background-color: rgba(9, 9, 11, 0.7);
+  border: 1px solid var(--border-color);
+  padding: 4px;
+  border-radius: 14px;
+  gap: 4px;
+  margin-top: auto; /* Push to bottom on desktop */
+}
+
+@media (max-width: 900px) {
+  .language-selector {
+    margin-top: 0;
+    width: 100%;
+  }
+}
+
+.lang-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 10px;
+  min-height: 48px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lang-btn:hover {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.lang-btn.active {
+  background-color: var(--neon-blue);
+  color: #fff;
+  box-shadow: var(--shadow-neon-blue);
+}
+
+
 
 
 

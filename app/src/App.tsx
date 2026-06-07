@@ -14,8 +14,10 @@ import StationCard from './components/StationCard';
 import Pagination from './components/Pagination';
 import ServicesModal from './components/ServicesModal';
 import { parseServiceTag } from './utils/stationUtils';
+import { useTranslation } from './i18n/LanguageContext';
 
 export default function App() {
+  const { t } = useTranslation();
   const [activeModule, setActiveModule] = useState<ActiveModule>('pitstop');
   const [fuelType, setFuelType] = useState<FuelType>('sp98');
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
@@ -311,8 +313,8 @@ export default function App() {
       <>
         <header className="module-header">
           <div className="module-title">
-            <h2>⛽ Pit-Stop Locator</h2>
-            <p>Locate the cheapest fuel stations in your route vicinity</p>
+            <h2>{t('pitstop.title')}</h2>
+            <p>{t('pitstop.subtitle')}</p>
           </div>
 
           {/* Controls: two rows — selectors on top, action buttons below */}
@@ -326,7 +328,7 @@ export default function App() {
                   onClick={() => setViewMode('list')}
                   id="view-list-toggle-btn"
                 >
-                  List
+                  {t('pitstop.toggle.list')}
                 </button>
                 <button
                   type="button"
@@ -334,7 +336,7 @@ export default function App() {
                   onClick={() => setViewMode('map')}
                   id="view-map-toggle-btn"
                 >
-                  Map
+                  {t('pitstop.toggle.map')}
                 </button>
               </div>
 
@@ -377,7 +379,7 @@ export default function App() {
                     boxSizing: 'border-box',
                   }}
                 >
-                  🏍️ Trip Settings ▾
+                  {t('pitstop.tripSettings')}
                 </button>
 
                 {tripDropdownOpen && (
@@ -399,19 +401,19 @@ export default function App() {
                     gap: '12px',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>👤 Profile:</span>
-                      <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>Rider</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{t('pitstop.profile')}</span>
+                      <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{t('pitstop.rider')}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Consumption:</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{t('pitstop.consumption')}</span>
                       <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{consumption} L/100km</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>⛽ Tank Capacity:</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{t('pitstop.tankCapacity')}</span>
                       <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{fillSize} L</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>🧭 Search Radius:</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{t('pitstop.searchRadius')}</span>
                       <span style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '0.85rem' }}>{searchRadius} km</span>
                     </div>
                     <button
@@ -431,7 +433,7 @@ export default function App() {
                         marginTop: '4px',
                       }}
                     >
-                      ⚙️ Edit Config
+                      {t('pitstop.editConfig')}
                     </button>
                   </div>
                 )}
@@ -445,7 +447,7 @@ export default function App() {
                 aria-expanded={mobileFiltersExpanded}
                 style={{ flexShrink: 0 }}
               >
-                {mobileFiltersExpanded ? '✕' : '⚙ Filters'}
+                {mobileFiltersExpanded ? '✕' : t('pitstop.filters')}
               </button>
             </div>
           </div>
@@ -472,22 +474,22 @@ export default function App() {
             
             {(gpsActive && gpsCoords) ? (
               <div className="search-active-message">
-                📍 Showing {filteredStations.length} stations within {searchRadius}km of location ({gpsCoords.lat.toFixed(4)}, {gpsCoords.lon.toFixed(4)})
+                {t('pitstop.showingStationsGps', { count: filteredStations.length, radius: searchRadius, lat: gpsCoords.lat.toFixed(4), lon: gpsCoords.lon.toFixed(4) })}
               </div>
             ) : submittedSearchQuery ? (
               <div className="search-active-message" style={{ color: 'var(--neon-blue)', borderColor: 'var(--neon-blue)', background: 'rgba(0, 240, 255, 0.05)' }}>
-                🔍 Found {filteredStations.length} stations near "{submittedSearchQuery}"
+                {t('pitstop.showingStationsSearch', { count: filteredStations.length, query: submittedSearchQuery })}
               </div>
             ) : (
               <div className="search-active-message" style={{ color: 'var(--neon-blue)', borderColor: 'var(--neon-blue)', background: 'rgba(0, 240, 255, 0.05)' }}>
-                ⛽ Found {filteredStations.length} stations
+                {t('pitstop.showingStationsAll', { count: filteredStations.length })}
               </div>
             )}
 
             {loading ? (
               <div className="loading-container">
                 <div className="spinner" aria-label="Loading data"></div>
-                <p>Querying cheapest fuel stations...</p>
+                <p>{t('pitstop.querying')}</p>
               </div>
             ) : error ? (
               <div className="empty-state" style={{ borderColor: 'var(--neon-orange)', color: '#fff' }}>
@@ -498,7 +500,7 @@ export default function App() {
                   className="glove-target action-btn"
                   style={{ marginTop: '20px', borderColor: 'var(--neon-orange)', color: 'var(--neon-orange)' }}
                 >
-                  Retry Connection
+                  {t('pitstop.retry')}
                 </button>
               </div>
             ) : (
@@ -525,8 +527,8 @@ export default function App() {
                 ) : (
                   <div className="empty-state">
                     {stations.length === 0 
-                      ? "No stations found matching search criteria." 
-                      : "No stations match the selected UI filters."}
+                      ? t('pitstop.emptySearch')
+                      : t('pitstop.emptyFilters')}
                   </div>
                 )}
                 </main>
@@ -575,9 +577,9 @@ export default function App() {
         <footer className="status-bar">
           <div className="status-indicator">
             <span className={`status-dot ${isOnline ? '' : 'offline'}`} aria-hidden="true"></span>
-            <span>{isOnline ? 'System Status: Online' : 'System Status: Offline'}</span>
+            <span>{isOnline ? t('footer.statusOnline') : t('footer.statusOffline')}</span>
           </div>
-          <div>API Target: {CONFIG.API_URL}</div>
+          <div>{t('footer.apiTarget', { url: CONFIG.API_URL })}</div>
         </footer>
       </div>
       <MotoSettingsModal

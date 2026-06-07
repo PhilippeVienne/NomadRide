@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface RadarModuleProps {
   onNavigateToPitstop: () => void;
 }
 
 export default function RadarModule({ onNavigateToPitstop }: RadarModuleProps) {
+  const { t } = useTranslation();
   const [autoReroute, setAutoReroute] = useState<boolean>(true);
   const [windThreshold, setWindThreshold] = useState<number>(40);
 
@@ -12,49 +14,49 @@ export default function RadarModule({ onNavigateToPitstop }: RadarModuleProps) {
     <div className="preview-dashboard">
       <header className="module-header">
         <div className="module-title">
-          <h2>📡 Radar Weather Routing</h2>
-          <p>Live rain radar overlay and proactive storm alerts along your itinerary</p>
+          <h2>{t('radar.title')}</h2>
+          <p>{t('radar.subtitle')}</p>
         </div>
       </header>
 
       <div className="mock-card" style={{ borderLeft: '4px solid var(--neon-orange)', background: 'rgba(255, 42, 42, 0.03)' }}>
         <div className="mock-title-row">
-          <h3 style={{ color: 'var(--neon-orange)' }}>⚠️ WEATHER ALERT</h3>
-          <span className="mock-badge red">Heavy Rain Expected</span>
+          <h3 style={{ color: 'var(--neon-orange)' }}>{t('radar.alertTitle')}</h3>
+          <span className="mock-badge red">{t('radar.alertBadge')}</span>
         </div>
-        <p style={{ color: '#fff', fontWeight: 600 }}>Rain cell moving East over Col d'Aspin in 35 minutes. Detouring advised to keep tires dry.</p>
+        <p style={{ color: '#fff', fontWeight: 600 }}>{t('radar.alertDesc')}</p>
       </div>
 
       <div className="mock-grid">
         <div className="mock-card">
           <div className="mock-title-row">
-            <h3>Route Segment Risks</h3>
-            <span className="mock-badge orange">High Winds</span>
+            <h3>{t('radar.segmentRisks')}</h3>
+            <span className="mock-badge orange">{t('radar.highWinds')}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>Toulouse ➡️ Foix</span>
-              <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>☀️ Sunny (18°C)</span>
+              <span style={{ color: 'var(--neon-green)', fontWeight: 700 }}>{t('radar.riskSunny', { temp: 18 })}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>Foix ➡️ Col d'Aspin</span>
-              <span style={{ color: 'var(--neon-orange)', fontWeight: 700 }}>🌧️ Rain (80% / 12°C)</span>
+              <span style={{ color: 'var(--neon-orange)', fontWeight: 700 }}>{t('radar.riskRain', { prob: 80, temp: 12 })}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>Col du Tourmalet</span>
-              <span style={{ color: 'var(--neon-orange)', fontWeight: 700 }}>💨 Winds (45 km/h)</span>
+              <span style={{ color: 'var(--neon-orange)', fontWeight: 700 }}>{t('radar.riskWinds', { speed: 45 })}</span>
             </div>
           </div>
         </div>
 
         <div className="mock-card">
           <div className="mock-title-row">
-            <h3>Radar Forecast Controls</h3>
-            <span className="mock-badge green">Live Updates</span>
+            <h3>{t('radar.controls')}</h3>
+            <span className="mock-badge green">{t('radar.liveUpdates')}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Auto-reroute on heavy rain</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('radar.autoReroute')}</span>
               <button
                 onClick={() => setAutoReroute(!autoReroute)}
                 className={`glove-target filter-toggle-btn ${autoReroute ? 'active' : ''}`}
@@ -64,7 +66,7 @@ export default function RadarModule({ onNavigateToPitstop }: RadarModuleProps) {
               </button>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Wind gust warning threshold</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('radar.windThreshold')}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={() => setWindThreshold((t) => Math.max(20, t - 5))}
@@ -88,8 +90,9 @@ export default function RadarModule({ onNavigateToPitstop }: RadarModuleProps) {
       </div>
 
       <button onClick={onNavigateToPitstop} className="glove-target action-btn" style={{ width: '100%' }}>
-        Return to Fuel Locator
+        {t('shelter.return')}
       </button>
     </div>
   );
 }
+
