@@ -45,6 +45,7 @@ export interface FuelQueryOptions {
   refresh?: boolean;
   fillSize?: number;
   consumption?: number;
+  excludeDistance?: boolean;
 }
 
 export interface LocationSuggestion {
@@ -100,6 +101,9 @@ export class ApiService {
       }
       if (options.consumption !== undefined) {
         params.append('consumption', options.consumption.toString());
+      }
+      if (options.excludeDistance) {
+        params.append('excludeDistance', 'true');
       }
 
       const url = `${CONFIG.ENDPOINTS.FUEL_CHEAPEST}?${params.toString()}`;

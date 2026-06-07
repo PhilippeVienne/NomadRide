@@ -11,6 +11,8 @@ interface MotoSettingsModalProps {
   onUpdateFillSize: (val: number) => void;
   onUpdateConsumption: (val: number) => void;
   onUpdateSearchRadius: (val: number) => void;
+  excludeDistance: boolean;
+  onUpdateExcludeDistance: (val: boolean) => void;
   // Location Override
   gpsActive: boolean;
   loading: boolean;
@@ -35,6 +37,8 @@ export default function MotoSettingsModal({
   onUpdateFillSize,
   onUpdateConsumption,
   onUpdateSearchRadius,
+  excludeDistance,
+  onUpdateExcludeDistance,
   gpsActive,
   loading,
   searchQuery,
@@ -48,7 +52,7 @@ export default function MotoSettingsModal({
   onSelectSuggestion,
   onManualRefresh,
 }: MotoSettingsModalProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -297,6 +301,56 @@ export default function MotoSettingsModal({
               </div>
               <button type="button" onClick={() => onUpdateSearchRadius(Math.min(100, searchRadius + 5))} className="glove-target pref-btn-adjust plus" aria-label="Increase search radius">+</button>
             </div>
+          </div>
+
+          <div className="pref-control-group">
+            <span className="pref-label">{t('settings.excludeDistance')}</span>
+            <button
+              type="button"
+              onClick={() => onUpdateExcludeDistance(!excludeDistance)}
+              className="glove-target"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingInline: '16px',
+                minHeight: '56px',
+                borderRadius: '16px',
+                border: excludeDistance ? '1px solid var(--neon-orange)' : '1px solid rgba(255,255,255,0.1)',
+                background: excludeDistance ? 'rgba(255, 107, 0, 0.1)' : 'rgba(9, 9, 11, 0.6)',
+                color: '#fff',
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+                boxSizing: 'border-box',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '12px' }}>
+                <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600 }}>
+                  {language === 'fr' ? (excludeDistance ? 'Oui' : 'Non') : (excludeDistance ? 'Yes' : 'No')}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
+                  {t('settings.excludeDistanceDesc')}
+                </span>
+              </div>
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '6px',
+                border: '2px solid ' + (excludeDistance ? 'var(--neon-orange)' : 'rgba(255,255,255,0.3)'),
+                background: excludeDistance ? 'var(--neon-orange)' : 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#000',
+                fontWeight: 'bold',
+                fontSize: '0.8rem',
+                flexShrink: 0,
+              }}>
+                {excludeDistance && '✓'}
+              </div>
+            </button>
           </div>
 
         </div>
