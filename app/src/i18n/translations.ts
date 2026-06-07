@@ -10,7 +10,7 @@ export const translations = {
     'sidebar.radar': 'Radar',
 
     // Pit-Stop Locator Module
-    'pitstop.title': '⛽ localisateur de stations',
+    'pitstop.title': 'Stations Services',
     'pitstop.subtitle': 'Trouvez les stations-service les moins chères à proximité de votre itinéraire',
     'pitstop.toggle.list': 'Liste',
     'pitstop.toggle.map': 'Carte',
@@ -155,6 +155,18 @@ export const translations = {
     'footer.statusOnline': 'Statut système : En ligne',
     'footer.statusOffline': 'Statut système : Hors ligne',
     'footer.apiTarget': 'Cible API : {url}',
+
+    // Fuel types
+    'fuel.sp98': 'SP98',
+    'fuel.sp95': 'SP95',
+    'fuel.e10': 'E10',
+    'fuel.gazole': 'Gazoil',
+
+    // Map popups
+    'map.searchLocation': 'Votre zone de recherche',
+    'map.price': 'PRIX {type}',
+    'map.estTotalCost': 'COÛT TOTAL EST.',
+    'map.navigate': "🏍️ S'Y RENDRE",
   },
   en: {
     // Sidebar / Navigation
@@ -312,5 +324,17 @@ export const translations = {
     'footer.statusOnline': 'System Status: Online',
     'footer.statusOffline': 'System Status: Offline',
     'footer.apiTarget': 'API Target: {url}',
+
+    // Fuel types
+    'fuel.sp98': 'SP98',
+    'fuel.sp95': 'SP95',
+    'fuel.e10': 'E10',
+    'fuel.gazole': 'Diesel',
+
+    // Map popups
+    'map.searchLocation': 'Your Search Location',
+    'map.price': '{type} PRICE',
+    'map.estTotalCost': 'EST. TOTAL COST',
+    'map.navigate': '🏍️ NAVIGATE',
   }
 } as const;

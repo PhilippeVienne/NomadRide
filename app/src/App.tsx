@@ -341,14 +341,14 @@ export default function App() {
               </div>
 
               <div className="selector-group" role="group" aria-label="Fuel Type Selector">
-                {(['sp98', 'sp95', 'e10'] as FuelType[]).map((type) => (
+                {(['sp98', 'sp95', 'e10', 'gazole'] as FuelType[]).map((type) => (
                   <button
                     id={`fuel-select-${type}`}
                     key={type}
                     onClick={() => setFuelType(type)}
                     className={`glove-target selector-btn ${fuelType === type ? 'active' : ''}`}
                   >
-                    {type.toUpperCase()}
+                    {t(`fuel.${type}` as any)}
                   </button>
                 ))}
               </div>

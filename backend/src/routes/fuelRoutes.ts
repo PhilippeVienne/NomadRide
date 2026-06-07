@@ -27,8 +27,8 @@ fuel.get('/cheapest', async (c) => {
   const consumptionStr = c.req.query('consumption');
 
   // Validation
-  if (!['sp98', 'sp95', 'e10'].includes(type)) {
-    return c.json({ error: 'Invalid fuel type. Use sp98, sp95, or e10.' }, 400);
+  if (!['sp98', 'sp95', 'e10', 'gazole'].includes(type)) {
+    return c.json({ error: 'Invalid fuel type. Use sp98, sp95, e10, or gazole.' }, 400);
   }
 
   const lat = latStr ? parseFloat(latStr) : undefined;

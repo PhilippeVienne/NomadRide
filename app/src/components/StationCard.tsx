@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FuelStation, FuelType } from '../services/apiService';
 import {
   formatLastUpdated,
@@ -14,6 +15,7 @@ interface StationCardProps {
 }
 
 export default function StationCard({ station, fuelType, index }: StationCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const { t, language } = useTranslation();
   const price = station[`${fuelType}_prix` as keyof FuelStation] as number | undefined;
   const updateTime = station[`${fuelType}_maj` as keyof FuelStation] as string;
@@ -47,9 +49,18 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
 
   const brand = getStationBrand(station.id, station.adresse, station.ville, station.brand);
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent toggling if user clicks the action link
+    if ((e.target as HTMLElement).closest('a')) {
+      return;
+    }
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <article
-      className={`station-card ${ruptureType ? 'rupture' : (isBestValue ? 'best-value' : (isCheapest ? 'cheapest' : 'alternative'))}`}
+      onClick={handleCardClick}
+      className={`station-card ${isExpanded ? 'expanded' : ''} ${ruptureType ? 'rupture' : (isBestValue ? 'best-value' : (isCheapest ? 'cheapest' : 'alternative'))}`}
     >
       <div className="card-top">
         <div className="price-tag">
@@ -89,6 +100,7 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
             )}
             {brand.name}
           </span>
+          <span className="card-chevron" aria-hidden="true">▼</span>
         </div>
       </div>
 

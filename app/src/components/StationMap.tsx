@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { FuelStation, FuelType } from '../services/apiService';
 import { getStationBrand } from '../utils/stationUtils';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface StationMapProps {
   stations: FuelStation[];
@@ -12,6 +13,7 @@ interface StationMapProps {
 }
 
 export default function StationMap({ stations, centerCoords, radiusKm, fuelType }: StationMapProps) {
+  const { t } = useTranslation();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -89,7 +91,7 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
       });
 
       L.marker(centerLatLng, { icon: centerIcon })
-        .bindTooltip('Your Search Location', { permanent: false, direction: 'top' })
+        .bindTooltip(t('map.searchLocation'), { permanent: false, direction: 'top' })
         .addTo(markersLayer);
 
       // Draw search radius circle overlay
@@ -193,13 +195,13 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
       
       const priceLabel = document.createElement('span');
       priceLabel.className = 'popup-label';
-      priceLabel.textContent = `${fuelType.toUpperCase()} PRICE`;
+      priceLabel.textContent = t('map.price', { type: fuelType.toUpperCase() });
       priceBlock.appendChild(priceLabel);
 
       const priceVal = document.createElement('span');
       if (ruptureType) {
         priceVal.className = 'popup-price rupture';
-        priceVal.textContent = 'RUPTURE';
+        priceVal.textContent = t('card.rupture');
       } else if (price) {
         priceVal.className = `popup-price ${status}`;
         priceVal.textContent = `${price.toFixed(3)} €`;
@@ -217,7 +219,7 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
 
         const costLabel = document.createElement('span');
         costLabel.className = 'popup-label';
-        costLabel.textContent = 'EST. TOTAL COST';
+        costLabel.textContent = t('map.estTotalCost');
         costBlock.appendChild(costLabel);
 
         const costVal = document.createElement('span');
@@ -233,7 +235,7 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
       navButton.className = 'popup-nav-button';
       navButton.target = '_blank';
       navButton.rel = 'noopener noreferrer';
-      navButton.textContent = '🏍️ NAVIGATE';
+      navButton.textContent = t('map.navigate');
       
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latVal},${lonVal}`;
       navButton.setAttribute('href', mapsUrl);

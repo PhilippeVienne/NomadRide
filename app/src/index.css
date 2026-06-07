@@ -2341,6 +2341,54 @@ h1, h2, h3, h4, .font-display {
   box-shadow: var(--shadow-neon-blue);
 }
 
+/* --- Collapsible Cards (Mobile-only) --- */
+@media (max-width: 600px) {
+  .station-card {
+    cursor: pointer;
+    position: relative;
+    padding-right: 48px; /* Room for chevron */
+  }
+
+  /* Chevron layout */
+  .card-top-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-chevron {
+    display: block !important;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .station-card.expanded .card-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Closed version overrides: hide cost, address details, services and actions */
+  .station-card:not(.expanded) .card-metrics-row .cost,
+  .station-card:not(.expanded) .card-body-details,
+  .station-card:not(.expanded) .card-meta,
+  .station-card:not(.expanded) .card-actions {
+    display: none !important;
+  }
+
+  .station-card:not(.expanded) .card-metrics-row {
+    grid-template-columns: 1fr;
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 601px) {
+  .card-chevron {
+    display: none !important;
+  }
+}
+
+
 
 
 

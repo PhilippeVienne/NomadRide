@@ -10,15 +10,19 @@ export interface FuelStation {
   sp98_prix?: number;
   sp95_prix?: number;
   e10_prix?: number;
+  gazole_prix?: number;
   sp98_maj?: string;
   sp95_maj?: string;
   e10_maj?: string;
+  gazole_maj?: string;
   sp98_rupture_debut?: string;
   sp98_rupture_type?: string;
   sp95_rupture_debut?: string;
   sp95_rupture_type?: string;
   e10_rupture_debut?: string;
   e10_rupture_type?: string;
+  gazole_rupture_debut?: string;
+  gazole_rupture_type?: string;
   services_service?: string[];
   horaires_automate_24_24?: string;
   carburants_disponibles?: string[];
@@ -29,7 +33,7 @@ export interface FuelStation {
   brand?: string; // Brand name from OSM data
 }
 
-export type FuelType = 'sp98' | 'sp95' | 'e10';
+export type FuelType = 'sp98' | 'sp95' | 'e10' | 'gazole';
 
 const API_URL = 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json?lang=fr&timezone=Europe%2FParis';
 
@@ -89,7 +93,7 @@ export async function getCheapestFuel(
   const ruptureTypeKey = `${type}_rupture_type` as keyof FuelStation;
 
   // Map API fuel type names
-  const fuelName = type === 'sp98' ? 'SP98' : type === 'sp95' ? 'SP95' : 'E10';
+  const fuelName = type === 'sp98' ? 'SP98' : type === 'sp95' ? 'SP95' : type === 'e10' ? 'E10' : 'Gazole';
 
   // Constants/Parameters for motorcycle cost metrics
   const averageFill = fillSize; // Custom fill size (liters)

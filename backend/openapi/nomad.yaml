@@ -19,7 +19,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [sp98, sp95, e10]
+            enum: [sp98, sp95, e10, gazole]
         - name: limit
           in: query
           required: false

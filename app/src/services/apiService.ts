@@ -9,15 +9,19 @@ export interface FuelStation {
   sp98_prix?: number;
   sp95_prix?: number;
   e10_prix?: number;
+  gazole_prix?: number;
   sp98_maj?: string;
   sp95_maj?: string;
   e10_maj?: string;
+  gazole_maj?: string;
   sp98_rupture_debut?: string;
   sp98_rupture_type?: string;
   sp95_rupture_debut?: string;
   sp95_rupture_type?: string;
   e10_rupture_debut?: string;
   e10_rupture_type?: string;
+  gazole_rupture_debut?: string;
+  gazole_rupture_type?: string;
   services_service?: string[];
   horaires_automate_24_24?: string;
   carburants_disponibles?: string[];
@@ -28,7 +32,7 @@ export interface FuelStation {
   brand?: string; // Brand name from OSM data
 }
 
-export type FuelType = 'sp98' | 'sp95' | 'e10';
+export type FuelType = 'sp98' | 'sp95' | 'e10' | 'gazole';
 
 export interface FuelQueryOptions {
   limit?: number;
