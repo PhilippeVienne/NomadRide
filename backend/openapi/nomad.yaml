@@ -65,6 +65,12 @@ paths:
           schema:
             type: number
             default: 4
+        - name: excludeDistance
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Successful response

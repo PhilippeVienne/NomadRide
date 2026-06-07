@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, FormEvent, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ApiService, FuelStation, FuelType, LocationSuggestion, FuelQueryOptions } from './services/apiService';
-import { CONFIG } from './config';
+
 import StationMap from './components/StationMap';
 import MotoSettingsModal from './components/MotoSettingsModal';
 import Sidebar, { ActiveModule } from './components/Sidebar';
@@ -20,7 +20,7 @@ export default function App() {
   const { t } = useTranslation();
   const [activeModule, setActiveModule] = useState<ActiveModule>('pitstop');
   const [fuelType, setFuelType] = useState<FuelType>('sp98');
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+
 
   // Search & Geolocation States
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -90,17 +90,7 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
 
-  // Monitor online/offline status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+
 
   // Debounced autocomplete search using TanStack Query
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
@@ -574,13 +564,6 @@ export default function App() {
             {renderActiveModule()}
           </div>
         </div>
-        <footer className="status-bar">
-          <div className="status-indicator">
-            <span className={`status-dot ${isOnline ? '' : 'offline'}`} aria-hidden="true"></span>
-            <span>{isOnline ? t('footer.statusOnline') : t('footer.statusOffline')}</span>
-          </div>
-          <div>{t('footer.apiTarget', { url: CONFIG.API_URL })}</div>
-        </footer>
       </div>
       <MotoSettingsModal
         isOpen={showSettingsModal}

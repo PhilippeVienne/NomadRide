@@ -261,5 +261,134 @@ describe('Fuel Service - Best Value Algorithm', () => {
     expect(results.length).toBe(1);
     expect(results[0].brand).toBe('Eni'); // Should match Eni by ID, even though Total is closer
   });
+
+  it('should exclude detour cost from ranking calculation when excludeDistance is true', async () => {
+    const mockData: FuelStation[] = [
+      {
+        id: 1,
+        latitude: '4360470', // At center
+        longitude: '144420',
+        cp: '31000',
+        adresse: 'Center St',
+        ville: 'Toulouse',
+        sp98_prix: 1.90,
+        sp98_maj: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        latitude: '4390000', // ~32.8 km away
+        longitude: '144420',
+        cp: '31200',
+        adresse: 'Far St',
+        ville: 'Toulouse',
+        sp98_prix: 1.70, // Cheaper base price, but large detour
+        sp98_maj: new Date().toISOString(),
+      }
+    ];
+
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('prix-des-carburants-en-france')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockData),
+        });
+      }
+      if (url.includes('overpass-api.de')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ elements: [] }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    // Query from Toulouse center (43.6047, 1.4442) with excludeDistance = true
+    const { stations: results } = await getCheapestFuel('sp98', 10, undefined, 43.6047, 1.4442, 50, true, undefined, undefined, true);
+
+    expect(results.length).toBe(2);
+    // With excludeDistance = true, Station 2 (price 1.70) must be Ranked #1 because detour is excluded
+    expect(results[0].id).toBe(2);
+    expect(results[0].total_cost).toBe(15.30); // 9 * 1.70 = 15.30
+
+    // Station 1 (price 1.90) must be Ranked #2
+    expect(results[1].id).toBe(1);
+    expect(results[1].total_cost).toBe(17.10); // 9 * 1.90 = 17.10
+  });
+
+  it('should detect border zones and merge stations from multiple countries (FR + DE)', async () => {
+    // Coordinate near Strasbourg-Kehl border (48.5734, 7.7866)
+    const mockFrData: FuelStation[] = [
+      {
+        id: 'FR_1',
+        latitude: '4857340', // Near center
+        longitude: '775000',
+        cp: '67000',
+        adresse: 'Strasbourg St',
+        ville: 'Strasbourg',
+        sp98_prix: 1.90,
+        sp98_maj: new Date().toISOString(),
+      }
+    ];
+
+    const mockDeData = {
+      ok: true,
+      stations: [
+        {
+          id: 'DE_1',
+          name: 'Kehl Station',
+          brand: 'Aral',
+          street: 'Hauptstr.',
+          place: 'Kehl',
+          lat: 48.5700,
+          lng: 7.8000,
+          dist: 1.5,
+          diesel: 1.70,
+          e5: 1.75, // mapped to sp98_prix in DE provider
+          e10: 1.70,
+          isOpen: true,
+        }
+      ]
+    };
+
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('prix-des-carburants-en-france')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockFrData),
+        });
+      }
+      if (url.includes('tankerkoenig.de')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockDeData),
+        });
+      }
+      if (url.includes('overpass-api.de')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            elements: [
+              { lat: 48.5734, lon: 7.7500, tags: { brand: 'Total' } }
+            ]
+          }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    const { stations: results } = await getCheapestFuel('sp98', 10, undefined, 48.5734, 7.7866, 15, true);
+
+    // Results should include 2 stations: 1 from FR, 1 from DE
+    expect(results.length).toBe(2);
+
+    // DE station is cheaper (1.75 vs 1.90) and should be ranked #1
+    expect(results[0].id).toBe('DE_1');
+    expect(results[0].brand).toBe('Aral');
+
+    // FR station should be ranked #2
+    expect(results[1].id).toBe('FR_1');
+    expect(results[1].brand).toBe('Total');
+  });
 });
+
 

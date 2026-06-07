@@ -107,14 +107,126 @@ h1, h2, h3, h4, .font-display {
   top: 0;
 }
 
+/* Hamburger Button */
+.hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  color: var(--text-primary);
+  border-radius: 12px;
+  transition: var(--transition-smooth);
+}
+
+.hamburger-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.hamburger-btn:active {
+  transform: scale(0.95);
+}
+
+.hamburger-icon {
+  position: relative;
+  width: 24px;
+  height: 2px;
+  background-color: var(--text-primary);
+  transition: var(--transition-smooth);
+}
+
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 2px;
+  background-color: var(--text-primary);
+  transition: var(--transition-smooth);
+}
+
+.hamburger-icon::before {
+  top: -8px;
+  left: 0;
+}
+
+.hamburger-icon::after {
+  top: 8px;
+  left: 0;
+}
+
+.sidebar-collapsible-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  flex-grow: 1;
+}
+
 @media (max-width: 900px) {
   .sidebar {
     height: auto;
     position: relative;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
-    padding: 16px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  
+  .logo-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+
+  /* Animated state when menu is open */
+  .sidebar.mobile-open .hamburger-icon {
+    background-color: transparent;
+  }
+  .sidebar.mobile-open .hamburger-icon::before {
+    transform: rotate(45deg);
+    top: 0;
+  }
+  .sidebar.mobile-open .hamburger-icon::after {
+    transform: rotate(-45deg);
+    top: 0;
+  }
+
+  .sidebar-collapsible-content {
+    display: none;
+    flex-direction: column;
     gap: 16px;
+    width: 100%;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .sidebar.mobile-open .sidebar-collapsible-content {
+    display: flex;
+  }
+  
+  .language-selector {
+    margin-top: 0;
+    width: 100%;
+  }
+  
+  .nav-menu {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    gap: 8px;
   }
 }
 
@@ -273,7 +385,6 @@ h1, h2, h3, h4, .font-display {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 20px;
-    overflow: hidden;
     max-width: 100%;
   }
 }
@@ -1199,14 +1310,17 @@ h1, h2, h3, h4, .font-display {
   }
   
   .sidebar {
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 0;
+    padding: 10px 14px;
   }
   
   .logo-container {
     width: 100%;
-    justify-content: center;
+    justify-content: space-between;
+  }
+  
+  .logo-text span {
+    display: none; /* Hide subtitle Compagnon de Route on mobile to save vertical space */
   }
   
   .nav-menu {
@@ -2112,6 +2226,27 @@ h1, h2, h3, h4, .font-display {
 
   .header-controls-row {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  /* Keep the trip settings button and filter button side-by-side on mobile */
+  .header-controls-row:nth-child(2) {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .header-controls-row .selector-group {
+    width: 100%;
+    display: flex;
+  }
+
+  .header-controls-row .selector-group .selector-btn {
+    flex: 1;
+    padding: 0;
+    text-align: center;
   }
 }
 
@@ -2310,7 +2445,17 @@ h1, h2, h3, h4, .font-display {
 @media (max-width: 900px) {
   .language-selector {
     margin-top: 0;
-    width: 100%;
+    width: 100% !important;
+    padding: 4px;
+    border-radius: 12px;
+  }
+  
+  .sidebar .lang-btn {
+    min-height: 48px !important;
+    min-width: 56px !important;
+    padding: 0 16px !important;
+    font-size: 0.95rem;
+    border-radius: 10px;
   }
 }
 
@@ -2352,13 +2497,18 @@ h1, h2, h3, h4, .font-display {
   /* Chevron layout */
   .card-top-right {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    padding-right: 12px; /* Ensure no overlap with absolute chevron */
   }
 
   .card-chevron {
+    position: absolute;
+    right: 16px;
+    top: 26px; /* Centered relative to the price tag / top badges */
     display: block !important;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     color: var(--text-secondary);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -2367,18 +2517,38 @@ h1, h2, h3, h4, .font-display {
     transform: rotate(180deg);
   }
 
-  /* Closed version overrides: hide cost, address details, services and actions */
-  .station-card:not(.expanded) .card-metrics-row .cost,
-  .station-card:not(.expanded) .card-body-details,
+  /* Closed version overrides: hide services, actions and metadata */
+  .station-card:not(.expanded) .services-container,
   .station-card:not(.expanded) .card-meta,
   .station-card:not(.expanded) .card-actions {
     display: none !important;
   }
 
   .station-card:not(.expanded) .card-metrics-row {
-    grid-template-columns: 1fr;
-    margin-top: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    margin-top: 12px;
     margin-bottom: 0;
+  }
+
+  .station-card:not(.expanded) .metric-box {
+    padding: 8px 10px;
+  }
+
+  .station-card:not(.expanded) .metric-value {
+    font-size: 1rem;
+  }
+
+  .station-card:not(.expanded) .card-body-details {
+    margin-top: 10px;
+    gap: 2px;
+  }
+
+  .station-card:not(.expanded) .station-address {
+    font-size: 0.95rem;
+  }
+
+  .station-card:not(.expanded) .station-city {
+    font-size: 0.72rem;
   }
 }
 

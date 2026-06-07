@@ -25,6 +25,7 @@ fuel.get('/cheapest', async (c) => {
   const refresh = c.req.query('refresh') === 'true';
   const fillSizeStr = c.req.query('fillSize');
   const consumptionStr = c.req.query('consumption');
+  const excludeDistance = c.req.query('excludeDistance') === 'true';
 
   // Validation
   if (!['sp98', 'sp95', 'e10', 'gazole'].includes(type)) {
@@ -50,7 +51,8 @@ fuel.get('/cheapest', async (c) => {
     radius,
     refresh,
     fillSize,
-    consumption
+    consumption,
+    excludeDistance
   );
   
   return c.json({

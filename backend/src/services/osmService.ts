@@ -37,7 +37,7 @@ export async function geocodeSearch(query: string): Promise<{ lat: number; lon: 
       q: query,
       format: 'json',
       limit: '1',
-      countrycodes: 'fr',
+      countrycodes: 'fr,mc,de,es,at,it,ch,li',
     });
 
     const response = await fetch(`${NOMINATIM_API}?${params.toString()}`, {
@@ -207,7 +207,7 @@ export async function lookupBrand(
  * Fetches OSM data once for the search area, then matches each station.
  */
 export async function enrichStationsWithBrands(
-  stations: Array<{ id: number; latitude: string; longitude: string; brand?: string }>,
+  stations: Array<{ id: string | number; latitude: string; longitude: string; brand?: string }>,
   searchCenterLat: number,
   searchCenterLon: number,
   searchRadiusKm: number
@@ -221,8 +221,12 @@ export async function enrichStationsWithBrands(
   let matched = 0;
   let unmatched = 0;
   for (const station of stations) {
-    const sLat = parseFloat(station.latitude) / 100000;
-    const sLon = parseFloat(station.longitude) / 100000;
+    const parseCoord = (val: string | number) => {
+      const parsed = parseFloat(val.toString());
+      return !isNaN(parsed) && Math.abs(parsed) > 1000 ? parsed / 100000 : parsed;
+    };
+    const sLat = parseCoord(station.latitude);
+    const sLon = parseCoord(station.longitude);
 
     if (isNaN(sLat) || isNaN(sLon)) continue;
 
@@ -245,7 +249,7 @@ function findNearestBrand(
   osmStations: OsmFuelStation[],
   lat: number,
   lon: number,
-  id?: number
+  id?: string | number
 ): string | undefined {
   // 1. Try matching by exact French government station ID if provided
   if (id !== undefined) {
@@ -302,7 +306,7 @@ export async function autocompleteSearch(query: string): Promise<Array<{ name: s
       q: query,
       format: 'json',
       limit: '5',
-      countrycodes: 'fr',
+      countrycodes: 'fr,mc,de,es,at,it,ch,li',
       addressdetails: '1'
     });
 
