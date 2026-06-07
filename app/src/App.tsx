@@ -251,6 +251,16 @@ export default function App() {
     setShowSuggestions(false);
   };
 
+  const handleMapChange = (newCenter: { lat: number; lon: number }, newRadiusKm: number) => {
+    setGpsActive(false);
+    setGpsCoords(null);
+    setGpsError(null);
+    setSearchQuery('');
+    setSubmittedSearchQuery('');
+    setSuggestionCoords(newCenter);
+    setSearchRadius(Math.round(newRadiusKm));
+  };
+
   // Manual cache refresh
   const handleManualRefresh = () => {
     forceRefreshRef.current = true;
@@ -466,6 +476,10 @@ export default function App() {
               <div className="search-active-message">
                 {t('pitstop.showingStationsGps', { count: filteredStations.length, radius: searchRadius, lat: gpsCoords.lat.toFixed(4), lon: gpsCoords.lon.toFixed(4) })}
               </div>
+            ) : (suggestionCoords && !submittedSearchQuery) ? (
+              <div className="search-active-message" style={{ color: 'var(--neon-blue)', borderColor: 'var(--neon-blue)', background: 'rgba(0, 240, 255, 0.05)' }}>
+                {t('pitstop.showingStationsMap', { count: filteredStations.length, radius: searchRadius })}
+              </div>
             ) : submittedSearchQuery ? (
               <div className="search-active-message" style={{ color: 'var(--neon-blue)', borderColor: 'var(--neon-blue)', background: 'rgba(0, 240, 255, 0.05)' }}>
                 {t('pitstop.showingStationsSearch', { count: filteredStations.length, query: submittedSearchQuery })}
@@ -501,6 +515,7 @@ export default function App() {
                   centerCoords={searchCenter}
                   radiusKm={searchRadius}
                   fuelType={fuelType}
+                  onMapChange={handleMapChange}
                 />
               ) : (
                 <>

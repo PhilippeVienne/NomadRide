@@ -427,8 +427,108 @@ describe('Fuel Service - Best Value Algorithm', () => {
     // CHF sp95_prix is mock base price (1.82 in SwitzerlandProvider for idx = 0)
     expect(station.sp95_prix).toBe(1.82);
     // total_cost in EUR before conversion was averageFill * sp95_prix_in_eur = 9 * (1.82 * 1.05) = 17.20 EUR
-    // total_cost in CHF after conversion: 17.199 * 0.95 = 16.34 CHF
-    expect(station.total_cost).toBeCloseTo(16.34, 1);
+    // total_cost in CHF after conversion: 17.199 / 1.05 = 16.38 CHF
+    expect(station.total_cost).toBeCloseTo(16.38, 1);
+  });
+
+  it('should deduplicate Swiss OSM fallback stations that are duplicates of official French stations in border zones', async () => {
+    // Geneva coordinate (46.2044, 6.1432)
+    // French station at coordinate 46.195, 6.26 (Annemasse)
+    const mockFrData: FuelStation[] = [
+      {
+        id: 74100001,
+        latitude: '4619500', // Annemasse
+        longitude: '626000',
+        cp: '74100',
+        adresse: 'Rue de Geneve',
+        ville: 'Annemasse',
+        sp98_prix: 1.88,
+        sp98_maj: new Date().toISOString(),
+      }
+    ];
+
+    const mockOsmElements = [
+      // Swiss station in Geneva (different coordinates)
+      {
+        id: 12345,
+        lat: 46.2044,
+        lon: 6.1432,
+        tags: {
+          amenity: 'fuel',
+          brand: 'Avia',
+          'addr:street': 'Rue de la Servette',
+          'addr:city': 'Genève',
+          'addr:postcode': '1202',
+          'addr:country': 'CH',
+        }
+      },
+      // French station in Annemasse (same/very close coordinates to mockFrData)
+      // This has a French postcode and country tag, so it will be filtered out in SwitzerlandProvider.
+      {
+        id: 54321,
+        lat: 46.1951,
+        lon: 6.2601,
+        tags: {
+          amenity: 'fuel',
+          brand: 'Système U',
+          'addr:street': 'Rue de Genève',
+          'addr:city': 'Annemasse',
+          'addr:postcode': '74100',
+          'addr:country': 'FR',
+        }
+      },
+      // Another duplicate of official French station but without country or postcode tag.
+      // This will pass SwitzerlandProvider filter but get caught by spatial deduplication in getCheapestFuel.
+      {
+        id: 99999,
+        lat: 46.19505,
+        lon: 6.26005,
+        tags: {
+          amenity: 'fuel',
+          brand: 'Système U',
+        }
+      }
+    ];
+
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('prix-des-carburants-en-france')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockFrData),
+        });
+      }
+      if (url.includes('overpass-api.de') || url.includes('lz4.overpass-api.de')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ elements: mockOsmElements }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    const { stations: results } = await getCheapestFuel('sp98', 10, undefined, 46.2044, 6.1432, 20, true);
+
+    // Results should include:
+    // 1. The official French station (74100001) in EUR.
+    // 2. The Swiss OSM station (CH_12345) in CHF.
+    // 3. It should NOT include the French OSM station (CH_54321) because it has non-Swiss tags.
+    // 4. It should NOT include the other duplicate OSM station (CH_99999) because of spatial deduplication.
+    expect(results.length).toBe(2);
+
+    const frStation = results.find(s => s.id === 74100001);
+    const chStation = results.find(s => s.id === 'CH_12345');
+    const duplicateStation1 = results.find(s => s.id === 'CH_54321');
+    const duplicateStation2 = results.find(s => s.id === 'CH_99999');
+
+    expect(frStation).toBeDefined();
+    expect(frStation!.currency).toBe('EUR');
+    expect(frStation!.sp98_prix).toBe(1.88);
+
+    expect(chStation).toBeDefined();
+    expect(chStation!.currency).toBe('CHF');
+
+    expect(duplicateStation1).toBeUndefined();
+    expect(duplicateStation2).toBeUndefined();
   });
 });
 

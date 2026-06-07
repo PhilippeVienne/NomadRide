@@ -10,14 +10,21 @@ interface StationMapProps {
   centerCoords: { lat: number; lon: number } | null;
   radiusKm: number;
   fuelType: FuelType;
+  onMapChange?: (newCenter: { lat: number; lon: number }, newRadiusKm: number) => void;
 }
 
-export default function StationMap({ stations, centerCoords, radiusKm, fuelType }: StationMapProps) {
+export default function StationMap({ stations, centerCoords, radiusKm, fuelType, onMapChange }: StationMapProps) {
   const { t } = useTranslation();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const circleOverlayRef = useRef<L.Circle | null>(null);
+  const programmaticMoveRef = useRef<boolean>(true);
+
+  const onMapChangeRef = useRef(onMapChange);
+  useEffect(() => {
+    onMapChangeRef.current = onMapChange;
+  }, [onMapChange]);
 
   // Initialize Map
   useEffect(() => {
@@ -28,10 +35,36 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
     const initialLon = centerCoords?.lon ?? 2.2137;
     const initialZoom = centerCoords ? 12 : 6;
 
+    programmaticMoveRef.current = true;
+
     const map = L.map(mapContainerRef.current, {
       zoomControl: false, // We'll add it to the top-right to avoid cluttering mobile UI
       attributionControl: true
     }).setView([initialLat, initialLon], initialZoom);
+
+    // Leaflet interaction-based search listener
+    let debounceTimer: any = null;
+    map.on('moveend', () => {
+      if (programmaticMoveRef.current) {
+        programmaticMoveRef.current = false; // reset
+        return;
+      }
+
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const newCenter = map.getCenter();
+        const bounds = map.getBounds();
+        const northEast = bounds.getNorthEast();
+        const distanceKm = newCenter.distanceTo(northEast) / 1000;
+        
+        // Limit search radius to max 30km (min 5km) to avoid spamming / large areas
+        const newRadius = Math.min(30, Math.max(5, distanceKm));
+
+        if (onMapChangeRef.current) {
+          onMapChangeRef.current({ lat: newCenter.lat, lon: newCenter.lng }, newRadius);
+        }
+      }, 400); // 400ms debounce
+    });
 
     // Add dark-themed CartoDB map tiles over HTTPS
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -47,7 +80,9 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
     markersLayerRef.current = L.layerGroup().addTo(map);
 
     return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
       if (mapRef.current) {
+        mapRef.current.off('moveend');
         mapRef.current.remove();
         mapRef.current = null;
         markersLayerRef.current = null;
@@ -251,7 +286,13 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
     });
 
     // 3. Zoom / Fit Map Viewport
-    if (bounds.isValid()) {
+    const currentCenter = map.getCenter();
+    const isMapInitiated = centerCoords && 
+      Math.abs(currentCenter.lat - centerCoords.lat) < 0.0001 &&
+      Math.abs(currentCenter.lng - centerCoords.lon) < 0.0001;
+
+    if (bounds.isValid() && !isMapInitiated) {
+      programmaticMoveRef.current = true;
       // Add padding to ensure markers are not cut off at screen edges
       map.fitBounds(bounds, {
         padding: [40, 40],

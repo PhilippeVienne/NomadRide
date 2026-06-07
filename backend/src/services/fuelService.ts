@@ -450,42 +450,63 @@ class SwitzerlandProvider implements FuelProvider {
         }
       }
 
-      const stations: FuelStation[] = elements.map((el: any, idx: number) => {
-        const elLat = el.lat ?? el.center?.lat;
-        const elLon = el.lon ?? el.center?.lon;
-        const brandName = el.tags?.brand || el.tags?.operator || el.tags?.name || 'Avia';
-        
-        // Mock stable Swiss prices (roughly 1.80 - 1.95 CHF, converted to €)
-        const basePrice = 1.82 + (idx % 5) * 0.03; 
-        const sp95 = basePrice;
-        const sp98 = basePrice + 0.08;
-        const e10 = basePrice - 0.02;
-        const gazole = basePrice + 0.05;
+      const stations: FuelStation[] = elements
+        .filter((el: any) => {
+          // If country code is set, it must be CH (Switzerland) or LI (Liechtenstein)
+          const country = el.tags?.['addr:country']?.toUpperCase();
+          if (country && country !== 'CH' && country !== 'LI') {
+            return false;
+          }
+          // If postcode is set, reject 5-digit postcodes (typical of FR/DE)
+          const postcode = el.tags?.['addr:postcode'];
+          if (postcode && /^\d{5}$/.test(postcode)) {
+            return false;
+          }
+          // Verify coordinates lie within Swiss + Liechtenstein bounding box
+          const elLat = el.lat ?? el.center?.lat;
+          const elLon = el.lon ?? el.center?.lon;
+          if (elLat !== undefined && elLon !== undefined) {
+            const inCHBox = elLat >= 45.8 && elLat <= 47.9 && elLon >= 5.9 && elLon <= 10.5;
+            if (!inCHBox) return false;
+          }
+          return true;
+        })
+        .map((el: any, idx: number) => {
+          const elLat = el.lat ?? el.center?.lat;
+          const elLon = el.lon ?? el.center?.lon;
+          const brandName = el.tags?.brand || el.tags?.operator || el.tags?.name || 'Avia';
+          
+          // Mock stable Swiss prices (roughly 1.80 - 1.95 CHF, converted to €)
+          const basePrice = 1.82 + (idx % 5) * 0.03; 
+          const sp95 = basePrice;
+          const sp98 = basePrice + 0.08;
+          const e10 = basePrice - 0.02;
+          const gazole = basePrice + 0.05;
 
-        const nowIso = new Date().toISOString();
+          const nowIso = new Date().toISOString();
 
-        return {
-          id: `CH_${el.id}`,
-          latitude: formatCoord(elLat),
-          longitude: formatCoord(elLon),
-          cp: el.tags?.['addr:postcode'] || '',
-          adresse: el.tags?.['addr:street'] || '',
-          ville: el.tags?.['addr:city'] || 'Genève',
-          brand: brandName,
-          sp95_prix: parseFloat(sp95.toFixed(3)),
-          sp95_maj: nowIso,
-          sp98_prix: parseFloat(sp98.toFixed(3)),
-          sp98_maj: nowIso,
-          e10_prix: parseFloat(e10.toFixed(3)),
-          e10_maj: nowIso,
-          gazole_prix: parseFloat(gazole.toFixed(3)),
-          gazole_maj: nowIso,
-          services_service: [],
-          carburants_disponibles: ['SP95', 'SP98', 'E10', 'Gazole'],
-          currency: 'CHF',
-          currencySymbol: 'CHF',
-        };
-      });
+          return {
+            id: `CH_${el.id}`,
+            latitude: formatCoord(elLat),
+            longitude: formatCoord(elLon),
+            cp: el.tags?.['addr:postcode'] || '',
+            adresse: el.tags?.['addr:street'] || '',
+            ville: el.tags?.['addr:city'] || 'Genève',
+            brand: brandName,
+            sp95_prix: parseFloat(sp95.toFixed(3)),
+            sp95_maj: nowIso,
+            sp98_prix: parseFloat(sp98.toFixed(3)),
+            sp98_maj: nowIso,
+            e10_prix: parseFloat(e10.toFixed(3)),
+            e10_maj: nowIso,
+            gazole_prix: parseFloat(gazole.toFixed(3)),
+            gazole_maj: nowIso,
+            services_service: [],
+            carburants_disponibles: ['SP95', 'SP98', 'E10', 'Gazole'],
+            currency: 'CHF',
+            currencySymbol: 'CHF',
+          };
+        });
 
       this.queryCache.set(cacheKey, { stations, fetchedAt: Date.now() });
       return stations;
@@ -510,6 +531,8 @@ const providers: FuelProvider[] = [
   atProvider,
   chProvider,
 ];
+
+const CHF_TO_EUR = 1.05;
 
 // Country Boundaries for spatial overlap detection
 interface CountryBounds {
@@ -630,6 +653,30 @@ export async function getCheapestFuel(
         return s;
       })
       .filter((s) => s.distance !== undefined && s.distance <= radius);
+      
+    // Deduplicate OSM fallback stations (from SwitzerlandProvider, starts with 'CH_')
+    // against official provider stations (do not start with 'CH_') within 150 meters.
+    const officialStations = results.filter((s) => !s.id.toString().startsWith('CH_'));
+    const osmStations = results.filter((s) => s.id.toString().startsWith('CH_'));
+
+    const filteredOsmStations = osmStations.filter((osm) => {
+      const osmLat = parseFloat(osm.latitude);
+      const osmLon = parseFloat(osm.longitude);
+      if (isNaN(osmLat) || isNaN(osmLon)) return false;
+
+      const isDuplicate = officialStations.some((off) => {
+        const offLat = parseFloat(off.latitude);
+        const offLon = parseFloat(off.longitude);
+        if (isNaN(offLat) || isNaN(offLon)) return false;
+        
+        const distBetween = calculateDistance(osmLat, osmLon, offLat, offLon);
+        return distBetween <= 0.15; // 150 meters
+      });
+
+      return !isDuplicate;
+    });
+
+    results = [...officialStations, ...filteredOsmStations];
 
     // Batch enrich brand names using OSM Overpass for stations with missing/unknown brand
     const stationsToEnrich = results.filter((s) => !s.brand || s.brand === 'Unknown');
@@ -667,7 +714,7 @@ export async function getCheapestFuel(
     if (isAvailable) {
       // Determine currency normalization factor (CHF -> EUR)
       const isSwiss = s.currency === 'CHF';
-      const toEur = isSwiss ? 1.05 : 1.0;
+      const toEur = isSwiss ? CHF_TO_EUR : 1.0;
       const priceInEur = price! * toEur;
 
       // staleness penalty logic (calculated in EUR)
@@ -722,8 +769,8 @@ export async function getCheapestFuel(
         }
         
         // Base price comparison normalized to EUR
-        const priceAInEur = priceA! * (a.currency === 'CHF' ? 1.05 : 1.0);
-        const priceBInEur = priceB! * (b.currency === 'CHF' ? 1.05 : 1.0);
+        const priceAInEur = priceA! * (a.currency === 'CHF' ? CHF_TO_EUR : 1.0);
+        const priceBInEur = priceB! * (b.currency === 'CHF' ? CHF_TO_EUR : 1.0);
         if (priceAInEur !== priceBInEur) {
           return priceAInEur - priceBInEur;
         }
@@ -739,13 +786,14 @@ export async function getCheapestFuel(
   // Post-process to format and convert Swiss values back to CHF
   const formattedStations = sorted.map((s) => {
     const isSwiss = s.currency === 'CHF';
-    const toOriginal = isSwiss ? 0.95 : 1.0;
 
     if (s.total_cost !== undefined) {
-      s.total_cost = parseFloat((s.total_cost * toOriginal).toFixed(2));
+      const convertedCost = isSwiss ? (s.total_cost / CHF_TO_EUR) : s.total_cost;
+      s.total_cost = parseFloat(convertedCost.toFixed(2));
     }
     if (s.freshness_penalty !== undefined) {
-      s.freshness_penalty = parseFloat((s.freshness_penalty * toOriginal).toFixed(4));
+      const convertedPenalty = isSwiss ? (s.freshness_penalty / CHF_TO_EUR) : s.freshness_penalty;
+      s.freshness_penalty = parseFloat(convertedPenalty.toFixed(4));
     }
     return s;
   });
