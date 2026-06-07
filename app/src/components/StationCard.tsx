@@ -71,7 +71,7 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
               <span className="price-integer">{priceInteger}</span>
               <span className="price-decimal-dot">.</span>
               <span className="price-fractional">{priceFraction}</span>
-              <span className="price-currency">€</span>
+              <span className="price-currency">{station.currencySymbol || '€'}</span>
             </>
           ) : (
             <span className="price-na">N/A</span>
@@ -110,7 +110,7 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
           {station.total_cost !== undefined && (
             <div className="metric-box cost" title="Estimated fill cost (9L fill + detour cost)">
               <span className="metric-label">{t('card.totalCost')}</span>
-              <span className="metric-value">🪙 {station.total_cost.toFixed(2)} €</span>
+              <span className="metric-value">🪙 {station.total_cost.toFixed(2)} {station.currencySymbol || '€'}</span>
             </div>
           )}
           {station.distance !== undefined && (
@@ -178,8 +178,8 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
         )}
 
         {station.freshness_penalty !== undefined && station.freshness_penalty > 0 && (
-          <div className="penalty-badge" title={`Staleness penalty applied: +${station.freshness_penalty.toFixed(3)} €/L`}>
-            {t('card.staleness', { penalty: station.freshness_penalty.toFixed(3) })}
+          <div className="penalty-badge" title={`Staleness penalty applied: +${station.freshness_penalty.toFixed(3)} ${(station.currencySymbol || '€')}/L`}>
+            {t('card.staleness', { penalty: station.freshness_penalty.toFixed(3), currency: station.currencySymbol || '€' })}
           </div>
         )}
       </div>

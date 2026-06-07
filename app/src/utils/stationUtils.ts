@@ -104,7 +104,7 @@ const brandKeywords: Array<{ patterns: string[]; index: number }> = [
   { patterns: ['eni'], index: 10 },
 ];
 
-export function getStationBrand(_id: number, adresse?: string, ville?: string, apiBrand?: string): BrandInfo {
+export function getStationBrand(_id: string | number, adresse?: string, ville?: string, apiBrand?: string): BrandInfo {
   // 1. Primary: use real brand from OSM/API if available
   if (apiBrand) {
     const brandLower = apiBrand.toLowerCase();

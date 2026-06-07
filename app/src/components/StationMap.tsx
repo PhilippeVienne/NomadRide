@@ -204,7 +204,7 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
         priceVal.textContent = t('card.rupture');
       } else if (price) {
         priceVal.className = `popup-price ${status}`;
-        priceVal.textContent = `${price.toFixed(3)} €`;
+        priceVal.textContent = `${price.toFixed(3)} ${station.currencySymbol || '€'}`;
       } else {
         priceVal.className = 'popup-price';
         priceVal.textContent = 'N/A';
@@ -224,7 +224,7 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
 
         const costVal = document.createElement('span');
         costVal.className = 'popup-cost';
-        costVal.textContent = `🪙 ${station.total_cost.toFixed(2)} €`;
+        costVal.textContent = `🪙 ${station.total_cost.toFixed(2)} ${station.currencySymbol || '€'}`;
         costBlock.appendChild(costVal);
         infoRow.appendChild(costBlock);
       }

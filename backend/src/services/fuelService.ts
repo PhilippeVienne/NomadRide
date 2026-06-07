@@ -28,9 +28,11 @@ export interface FuelStation {
   carburants_disponibles?: string[];
   carburants_indisponibles?: string[];
   distance?: number; // Optional distance in km
-  total_cost?: number; // Calculated fill-up cost in € (fuel + detour)
-  freshness_penalty?: number; // Applied freshness penalty in €/L
+  total_cost?: number; // Calculated fill-up cost (fuel + detour) in station's currency
+  freshness_penalty?: number; // Applied freshness penalty in currency/L
   brand?: string; // Brand name
+  currency?: string; // e.g. 'EUR', 'CHF'
+  currencySymbol?: string; // e.g. '€', 'CHF'
 }
 
 export type FuelType = 'sp98' | 'sp95' | 'e10' | 'gazole';
@@ -94,6 +96,8 @@ class FranceProvider implements FuelProvider {
         ...s,
         latitude: formatCoord(s.latitude),
         longitude: formatCoord(s.longitude),
+        currency: 'EUR',
+        currencySymbol: '€',
       }));
       this.lastFetch = now;
       return this.cachedStations;
@@ -172,6 +176,8 @@ class SpainProvider implements FuelProvider {
           brand: brandName,
           services_service: [],
           carburants_disponibles: [],
+          currency: 'EUR',
+          currencySymbol: '€',
         };
 
         if (sp98 !== undefined) {
@@ -261,6 +267,8 @@ class GermanyProvider implements FuelProvider {
           brand: s.brand || s.name || 'Unknown',
           services_service: [],
           carburants_disponibles: [],
+          currency: 'EUR',
+          currencySymbol: '€',
         };
 
         const nowIso = new Date().toISOString();
@@ -347,6 +355,8 @@ class AustriaProvider implements FuelProvider {
           brand: s.name || 'Unknown',
           services_service: [],
           carburants_disponibles: [],
+          currency: 'EUR',
+          currencySymbol: '€',
         };
 
         const nowIso = new Date().toISOString();
@@ -472,6 +482,8 @@ class SwitzerlandProvider implements FuelProvider {
           gazole_maj: nowIso,
           services_service: [],
           carburants_disponibles: ['SP95', 'SP98', 'E10', 'Gazole'],
+          currency: 'CHF',
+          currencySymbol: 'CHF',
         };
       });
 
@@ -653,28 +665,33 @@ export async function getCheapestFuel(
       (!s.carburants_disponibles || s.carburants_disponibles.includes(fuelName));
 
     if (isAvailable) {
-      // staleness penalty logic
-      let penalty = 0;
+      // Determine currency normalization factor (CHF -> EUR)
+      const isSwiss = s.currency === 'CHF';
+      const toEur = isSwiss ? 1.05 : 1.0;
+      const priceInEur = price! * toEur;
+
+      // staleness penalty logic (calculated in EUR)
+      let penaltyInEur = 0;
       if (updateTime) {
         const updateMs = new Date(updateTime).getTime();
         if (!isNaN(updateMs)) {
           const ageHours = (nowMs - updateMs) / (3600 * 1000);
           if (ageHours > 12) {
-            penalty = Math.min(0.15, (ageHours - 12) * 0.002);
+            penaltyInEur = Math.min(0.15, (ageHours - 12) * 0.002);
           }
         }
       } else {
-        penalty = 0.15;
+        penaltyInEur = 0.15;
       }
 
-      s.freshness_penalty = parseFloat(penalty.toFixed(4));
-      const effectivePrice = price! + penalty;
+      s.freshness_penalty = penaltyInEur; // Keep in EUR for now
+      const effectivePriceInEur = priceInEur + penaltyInEur;
 
       if (s.distance !== undefined && !excludeDistance) {
         const detourFuel = s.distance * detourMultiplier * consumptionPerKm;
-        s.total_cost = parseFloat(((averageFill * effectivePrice) + (detourFuel * effectivePrice)).toFixed(2));
+        s.total_cost = (averageFill * effectivePriceInEur) + (detourFuel * effectivePriceInEur);
       } else {
-        s.total_cost = parseFloat((averageFill * effectivePrice).toFixed(2));
+        s.total_cost = averageFill * effectivePriceInEur;
       }
     } else {
       (s as any)[priceKey] = undefined;
@@ -703,8 +720,12 @@ export async function getCheapestFuel(
         if (costA !== undefined && costB !== undefined && costA !== costB) {
           return costA - costB;
         }
-        if (priceA! !== priceB!) {
-          return priceA! - priceB!;
+        
+        // Base price comparison normalized to EUR
+        const priceAInEur = priceA! * (a.currency === 'CHF' ? 1.05 : 1.0);
+        const priceBInEur = priceB! * (b.currency === 'CHF' ? 1.05 : 1.0);
+        if (priceAInEur !== priceBInEur) {
+          return priceAInEur - priceBInEur;
         }
       }
 
@@ -715,8 +736,22 @@ export async function getCheapestFuel(
     })
     .slice(0, limit);
 
+  // Post-process to format and convert Swiss values back to CHF
+  const formattedStations = sorted.map((s) => {
+    const isSwiss = s.currency === 'CHF';
+    const toOriginal = isSwiss ? 0.95 : 1.0;
+
+    if (s.total_cost !== undefined) {
+      s.total_cost = parseFloat((s.total_cost * toOriginal).toFixed(2));
+    }
+    if (s.freshness_penalty !== undefined) {
+      s.freshness_penalty = parseFloat((s.freshness_penalty * toOriginal).toFixed(4));
+    }
+    return s;
+  });
+
   return {
-    stations: sorted,
+    stations: formattedStations,
     centerLat,
     centerLon,
   };

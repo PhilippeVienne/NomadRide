@@ -148,7 +148,7 @@ export const translations = {
     'card.since': 'Depuis {time}',
     'card.updated': 'Mis à jour {time}',
     'card.automate24': '⚡ 24/24',
-    'card.staleness': 'Fraîcheur : +{penalty} €/L',
+    'card.staleness': 'Fraîcheur : +{penalty} {currency}/L',
     'card.more': '+{count} autres',
 
     // Footer
@@ -317,7 +317,7 @@ export const translations = {
     'card.since': 'Since {time}',
     'card.updated': 'Updated {time}',
     'card.automate24': '⚡ 24/24',
-    'card.staleness': 'Staleness: +{penalty} €/L',
+    'card.staleness': 'Staleness: +{penalty} {currency}/L',
     'card.more': '+{count} more',
 
     // Footer

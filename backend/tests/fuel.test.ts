@@ -389,6 +389,47 @@ describe('Fuel Service - Best Value Algorithm', () => {
     expect(results[1].id).toBe('FR_1');
     expect(results[1].brand).toBe('Total');
   });
+
+  it('should detect Swiss stations, normalize prices to EUR for sorting, and return results in CHF', async () => {
+    // Geneva coordinate (46.2044, 6.1432)
+    const mockSwissElements = [
+      {
+        id: 12345,
+        lat: 46.2044,
+        lon: 6.1432,
+        tags: {
+          amenity: 'fuel',
+          brand: 'Avia',
+          'addr:street': 'Rue de la Servette',
+          'addr:city': 'Genève',
+          'addr:postcode': '1202',
+        }
+      }
+    ];
+
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('overpass-api.de') || url.includes('lz4.overpass-api.de')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ elements: mockSwissElements }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    const { stations: results } = await getCheapestFuel('sp95', 10, undefined, 46.2044, 6.1432, 10, true);
+
+    expect(results.length).toBe(1);
+    const station = results[0];
+    expect(station.id).toBe('CH_12345');
+    expect(station.currency).toBe('CHF');
+    expect(station.currencySymbol).toBe('CHF');
+    // CHF sp95_prix is mock base price (1.82 in SwitzerlandProvider for idx = 0)
+    expect(station.sp95_prix).toBe(1.82);
+    // total_cost in EUR before conversion was averageFill * sp95_prix_in_eur = 9 * (1.82 * 1.05) = 17.20 EUR
+    // total_cost in CHF after conversion: 17.199 * 0.95 = 16.34 CHF
+    expect(station.total_cost).toBeCloseTo(16.34, 1);
+  });
 });
 
 

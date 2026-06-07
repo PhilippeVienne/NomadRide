@@ -1,7 +1,7 @@
 import { CONFIG } from '../config';
 
 export interface FuelStation {
-  id: number;
+  id: string | number;
   adresse: string;
   ville: string;
   latitude: string;
@@ -27,9 +27,11 @@ export interface FuelStation {
   carburants_disponibles?: string[];
   carburants_indisponibles?: string[];
   distance?: number; // Distance in km if queried by geolocation
-  total_cost?: number; // Calculated fill-up cost in €
-  freshness_penalty?: number; // Applied freshness penalty in €/L
+  total_cost?: number; // Calculated fill-up cost in local currency
+  freshness_penalty?: number; // Applied freshness penalty in local currency/L
   brand?: string; // Brand name from OSM data
+  currency?: string; // e.g. 'EUR', 'CHF'
+  currencySymbol?: string; // e.g. '€', 'CHF'
 }
 
 export type FuelType = 'sp98' | 'sp95' | 'e10' | 'gazole';
