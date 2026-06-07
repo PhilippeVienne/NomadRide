@@ -61,7 +61,6 @@ resource "aws_lambda_function" "backend" {
       NODE_ENV       = var.environment
       STORAGE_MODE   = "S3"
       S3_BUCKET_NAME = aws_s3_bucket.weather_cache.id
-      AWS_REGION     = var.aws_region
     }
   }
 
