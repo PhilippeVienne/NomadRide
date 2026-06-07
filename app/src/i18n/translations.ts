@@ -118,6 +118,8 @@ export const translations = {
     'settings.tankSize': 'Réservoir (plein)',
     'settings.consumption': 'Consommation',
     'settings.radius': 'Rayon de recherche',
+    'settings.excludeDistance': 'Exclure le coût du détour',
+    'settings.excludeDistanceDesc': 'Trier uniquement par prix à la pompe (inclut pénalité de fraîcheur)',
     'settings.apply': 'Appliquer les paramètres',
     'settings.close': 'Fermer la configuration',
 
@@ -288,6 +290,8 @@ export const translations = {
     'settings.tankSize': 'Tank Fill Size',
     'settings.consumption': 'Consumption',
     'settings.radius': 'Search Radius',
+    'settings.excludeDistance': 'Exclude Detour Cost',
+    'settings.excludeDistanceDesc': 'Sort purely by pump price (includes freshness penalty)',
     'settings.apply': 'Apply Settings',
     'settings.close': 'Close Settings',
 

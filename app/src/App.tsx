@@ -52,6 +52,11 @@ export default function App() {
     return saved ? parseInt(saved, 10) : 25;
   });
 
+  const [excludeDistance, setExcludeDistance] = useState<boolean>(() => {
+    const saved = localStorage.getItem('nomad_exclude_distance');
+    return saved === 'true';
+  });
+
   const handleUpdateFillSize = (val: number) => {
     const next = Math.max(2, Math.min(50, val));
     setFillSize(next);
@@ -68,6 +73,11 @@ export default function App() {
     const next = Math.max(5, Math.min(100, val));
     setSearchRadius(next);
     localStorage.setItem('nomad_search_radius', next.toString());
+  };
+
+  const handleUpdateExcludeDistance = (val: boolean) => {
+    setExcludeDistance(val);
+    localStorage.setItem('nomad_exclude_distance', val.toString());
   };
 
   // UI Filters
@@ -136,6 +146,7 @@ export default function App() {
       fillSize,
       consumption,
       searchRadius,
+      excludeDistance,
     ],
     queryFn: async () => {
       const forceRefresh = forceRefreshRef.current;
@@ -147,6 +158,7 @@ export default function App() {
         fillSize,
         consumption,
         radius: searchRadius,
+        excludeDistance,
         limit: 150,
       };
 
@@ -162,7 +174,7 @@ export default function App() {
   });
 
   const stations = fuelData?.stations ?? [];
-  const searchCenter = fuelData?.location ? { lat: fuelData.location.lat, lon: fuelData.location.lon } : null;
+  const searchCenter = gpsActive ? gpsCoords : suggestionCoords;
   const loading = isFetching || isLocating;
   const error = fuelError ? 'Failed to fetch fuel prices. Make sure backend service is running.' : null;
 
@@ -490,7 +502,7 @@ export default function App() {
               </div>
             )}
 
-            {loading ? (
+            {isLocating ? (
               <div className="loading-container">
                 <div className="spinner" aria-label="Loading data"></div>
                 <p>{t('pitstop.querying')}</p>
@@ -510,39 +522,79 @@ export default function App() {
             ) : (
               <>
               {viewMode === 'map' ? (
-                <StationMap
-                  stations={filteredStations}
-                  centerCoords={searchCenter}
-                  radiusKm={searchRadius}
-                  fuelType={fuelType}
-                  onMapChange={handleMapChange}
-                />
+                <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <StationMap
+                    stations={filteredStations}
+                    centerCoords={searchCenter}
+                    radiusKm={searchRadius}
+                    fuelType={fuelType}
+                    onMapChange={handleMapChange}
+                  />
+                  {isFetching && (
+                    <div className="map-loading-overlay" style={{
+                      position: 'absolute',
+                      top: '20px',
+                      left: '20px',
+                      background: 'rgba(19, 19, 26, 0.85)',
+                      padding: '12px 20px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      zIndex: 1000,
+                      backdropFilter: 'blur(8px)',
+                      pointerEvents: 'none',
+                    }}>
+                      <div className="spinner-small" style={{
+                        width: '18px',
+                        height: '18px',
+                        border: '2px solid rgba(255, 255, 255, 0.1)',
+                        borderTopColor: 'var(--neon-orange)',
+                        borderRadius: '50%',
+                        animation: 'spin 0.8s linear infinite',
+                      }}></div>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>
+                        {t('pitstop.querying')}
+                      </span>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <>
-                <main className="station-grid">
-                {paginatedStations.length > 0 ? (
-                  paginatedStations.map((station, idx) => (
-                    <StationCard
-                      key={station.id}
-                      station={station}
-                      fuelType={fuelType}
-                      index={(currentPage - 1) * pageSize + idx}
-                    />
-                  ))
-                ) : (
-                  <div className="empty-state">
-                    {stations.length === 0 
-                      ? t('pitstop.emptySearch')
-                      : t('pitstop.emptyFilters')}
+                {isFetching ? (
+                  <div className="loading-container">
+                    <div className="spinner" aria-label="Loading data"></div>
+                    <p>{t('pitstop.querying')}</p>
                   </div>
-                )}
-                </main>
+                ) : (
+                  <>
+                  <main className="station-grid">
+                  {paginatedStations.length > 0 ? (
+                    paginatedStations.map((station, idx) => (
+                      <StationCard
+                        key={station.id}
+                        station={station}
+                        fuelType={fuelType}
+                        index={(currentPage - 1) * pageSize + idx}
+                      />
+                    ))
+                  ) : (
+                    <div className="empty-state">
+                      {stations.length === 0 
+                        ? t('pitstop.emptySearch')
+                        : t('pitstop.emptyFilters')}
+                    </div>
+                  )}
+                  </main>
 
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                  </>
+                )}
                 </>
               )}
               </>
@@ -586,9 +638,11 @@ export default function App() {
         fillSize={fillSize}
         consumption={consumption}
         searchRadius={searchRadius}
+        excludeDistance={excludeDistance}
         onUpdateFillSize={handleUpdateFillSize}
         onUpdateConsumption={handleUpdateConsumption}
         onUpdateSearchRadius={handleUpdateSearchRadius}
+        onUpdateExcludeDistance={handleUpdateExcludeDistance}
         gpsActive={gpsActive}
         loading={loading}
         searchQuery={searchQuery}
