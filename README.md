@@ -2,7 +2,11 @@
 
 > **The biker's instinct. The road's intelligence.**
 
+[![Live Demo](https://img.shields.io/badge/Live-ride.vienne.me-orange?style=for-the-badge&logo=motorcycle)](https://ride.vienne.me)
+
 **NomadRide** is an intelligent assistant designed by and for bikers. Whether you're heading out for a multi-day road trip or a Sunday ride, NomadRide is your co-pilot. It handles the unexpected, optimizes your budget, and looks out for your safety.
+
+You can access the live application running at: **[ride.vienne.me](https://ride.vienne.me)**
 
 ---
 
@@ -17,6 +21,8 @@ NomadRide is built around five modules designed to meet the specific needs of tw
 - **⛽ Pit-Stop**: Never run dry again. Intelligent search for gas stations on your route when you hit reserve.
 
 - **🪙 Wallet**: Calculate the cost of your ride. Estimate the total cost of your trip, including fuel, tolls, and motorcycle wear and tear.
+
+- **📡 Radar**: Weather routing in real-time. Live rain radar overlay and proactive storm alerts along your itinerary to avoid downpours.
 
 ---
 
