@@ -31,8 +31,8 @@ export default function StationCard({ station, fuelType, index }: StationCardPro
     : (isBestValue ? t('card.bestValue') : (isCheapest ? t('card.cheapest') : `#${index + 1}`));
 
   // Parse coordinates for Google Maps link fallback
-  const latVal = parseFloat(station.latitude) / 100000;
-  const lonVal = parseFloat(station.longitude) / 100000;
+  const latVal = parseFloat(station.latitude);
+  const lonVal = parseFloat(station.longitude);
   const mapsUrl = !isNaN(latVal) && !isNaN(lonVal)
     ? `https://www.google.com/maps/search/?api=1&query=${latVal},${lonVal}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(station.adresse + ', ' + station.ville)}`;

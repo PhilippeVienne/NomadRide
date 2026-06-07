@@ -109,8 +109,8 @@ export default function StationMap({ stations, centerCoords, radiusKm, fuelType 
 
     // 2. Draw Station Markers
     stations.forEach((station, index) => {
-      const latVal = parseFloat(station.latitude) / 100000;
-      const lonVal = parseFloat(station.longitude) / 100000;
+      const latVal = parseFloat(station.latitude);
+      const lonVal = parseFloat(station.longitude);
 
       if (isNaN(latVal) || isNaN(lonVal)) return;
 
