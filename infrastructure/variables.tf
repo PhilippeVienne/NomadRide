@@ -15,3 +15,9 @@ variable "app_name" {
   description = "Application name prefix for resource naming"
   default     = "nomadride"
 }
+
+variable "enable_waf" {
+  type        = bool
+  description = "Whether to enable AWS WAF for CloudFront (incurs monthly charges)"
+  default     = false
+}

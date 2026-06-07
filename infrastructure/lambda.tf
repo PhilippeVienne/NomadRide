@@ -58,7 +58,10 @@ resource "aws_lambda_function" "backend" {
 
   environment {
     variables = {
-      NODE_ENV = var.environment
+      NODE_ENV       = var.environment
+      STORAGE_MODE   = "S3"
+      S3_BUCKET_NAME = aws_s3_bucket.weather_cache.id
+      AWS_REGION     = var.aws_region
     }
   }
 
@@ -72,4 +75,35 @@ resource "aws_lambda_function" "backend" {
       image_uri,
     ]
   }
+}
+
+# IAM policy allowing Lambda to access the weather cache bucket
+resource "aws_iam_policy" "lambda_s3_weather" {
+  name        = "${var.app_name}-${var.environment}-lambda-s3-weather-policy"
+  description = "Allows Lambda backend to read and write forecast slices in the S3 weather cache bucket"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          aws_s3_bucket.weather_cache.arn,
+          "${aws_s3_bucket.weather_cache.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+# Attach S3 policy to Lambda execution role
+resource "aws_iam_role_policy_attachment" "lambda_s3_weather" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.lambda_s3_weather.arn
 }

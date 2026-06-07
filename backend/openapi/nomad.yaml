@@ -103,4 +103,58 @@ paths:
                       type: number
                     lon:
                       type: number
+  /api/radar/status:
+    get:
+      summary: Get weather radar status and run info
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  latestRun:
+                    type: string
+                  updatedAt:
+                    type: string
+                  availableSteps:
+                    type: array
+                    items:
+                      type: integer
+  /api/radar/forecast/{hour}:
+    get:
+      summary: Get weather forecast data for a specific hour
+      parameters:
+        - name: hour
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runTime:
+                    type: string
+                  step:
+                    type: integer
+                  forecastTime:
+                    type: string
+                  geojson:
+                    type: object
+                  cloudsGeojson:
+                    type: object
+                  windData:
+                    type: object
+  /api/radar/ingest:
+    post:
+      summary: Trigger ingestion of weather data
+      responses:
+        '202':
+          description: Ingestion pipeline started in background
 

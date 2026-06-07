@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
 import fuel from './routes/fuelRoutes';
+import radar from './routes/radarRoutes';
 
 const app = new Hono();
 
@@ -23,8 +24,9 @@ app.get('/health', (c) => {
   });
 });
 
-// Register fuel routes
+// Register routes
 app.route('/api/fuel', fuel);
+app.route('/api/radar', radar);
 
 // Example of a modular route
 app.get('/api/explore', (c) => {

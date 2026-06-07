@@ -4,5 +4,7 @@ export const CONFIG = {
   API_URL,
   ENDPOINTS: {
     FUEL_CHEAPEST: `${API_URL}/api/fuel/cheapest`,
+    RADAR_STATUS: `${API_URL}/api/radar/status`,
+    RADAR_FORECAST: (hour: number) => `${API_URL}/api/radar/forecast/${hour}`,
   },
 };

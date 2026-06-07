@@ -22,4 +22,15 @@ await build({
   sourcemap: true,
 });
 
+// Build Ingest Handler (for EventBridge Lambda/Worker)
+await build({
+  entryPoints: ['src/ingest.ts'],
+  bundle: true,
+  platform: 'node',
+  target: 'node20',
+  outfile: 'dist/ingest.js',
+  minify: true,
+  sourcemap: true,
+});
+
 console.log('⚡ Build complete');

@@ -43,3 +43,24 @@ resource "aws_s3_bucket_policy" "frontend" {
     ]
   })
 }
+
+# S3 Bucket for Weather Radar Cache (Option B forecast JSON storage)
+resource "aws_s3_bucket" "weather_cache" {
+  bucket        = "${var.app_name}-${var.environment}-weather-cache"
+  force_destroy = true # Safe to destroy for this companion/demo setup
+
+  tags = {
+    Name        = "${var.app_name}-weather-cache"
+    Environment = var.environment
+  }
+}
+
+# Block Public Access to Weather S3 Bucket
+resource "aws_s3_bucket_public_access_block" "weather_cache" {
+  bucket = aws_s3_bucket.weather_cache.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}

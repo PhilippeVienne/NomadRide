@@ -13,7 +13,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   aliases             = ["ride.vienne.me"]
-  web_acl_id          = aws_wafv2_web_acl.cloudfront.arn
+  web_acl_id          = var.enable_waf ? aws_wafv2_web_acl.cloudfront[0].arn : null
 
   # Origin 1: S3 Bucket (Frontend)
   origin {
